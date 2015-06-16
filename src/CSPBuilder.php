@@ -18,7 +18,7 @@ class CSPBuilder
         'connect-uri',
         'font-uri',
         'form-action',
-        'frame-ancesotrs',
+        'frame-ancestors',
         'img-src',
         'media-src',
         'object-src',

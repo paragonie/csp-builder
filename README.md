@@ -45,7 +45,7 @@ $csp->sendCSPHeader();
         ],
         "self": true
     },
-    "frame-ancesotrs": [],
+    "frame-ancestors": [],
     "img-src": {
         "self": true,
         "data": true
