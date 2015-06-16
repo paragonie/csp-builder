@@ -79,10 +79,53 @@ class CSPBuilder
      */
     public function addSource($dir, $path)
     {
-       if (!\preg_match('#\-src$#', $dir)) {
-           $dir .= '-src';
-       }
-       $this->policies[$dir]['allow'][] = $path;
+        switch ($dir) {
+            case 'child':
+            case 'frame':
+            case 'frame-src':
+                $dir = 'child-src';
+                break;
+            case 'connect':
+            case 'socket':
+            case 'websocket':
+                $dir = 'connect-src';
+                break;
+            case 'font':
+            case 'fonts':
+                $dir = 'font-src';
+                break;
+            case 'form':
+            case 'forms':
+                $dir = 'form-action';
+                break;
+            case 'ancestor':
+            case 'parent':
+                $dir = 'frame-ancestors';
+                break;
+            case 'img':
+            case 'image':
+            case 'image-src':
+                $dir = 'img-src';
+                break;
+            case 'media':
+                $dir = 'media-src';
+                break;
+            case 'object':
+                $dir = 'object-src';
+                break;
+            case 'js':
+            case 'javascript':
+            case 'script':
+            case 'scripts':
+                $dir = 'script-src';
+                break;
+            case 'style':
+            case 'css':
+            case 'css-src':
+                $dir = 'style-src';
+                break;
+        }
+        $this->policies[$dir]['allow'][] = $path;
     }
     
     /**
