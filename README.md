@@ -20,6 +20,54 @@ $csp->sendCSPHeader();
 
 ```
 
+### Example
+
+```json
+{
+    "report-only": false,
+    "report-uri": "/csp_violation_reporting_endpoint",
+    "base-uri": [],
+    "default-src": [],    
+    "child-src": {
+        "allow": [
+            "https://www.youtube.com",
+            "https://www.youtube-nocookie.com"
+        ],
+        "self": false
+    },
+    "connect-uri": [],
+    "font-uri": {
+        "self": true
+    },
+    "form-action": {
+        "allow": [
+            "https://example.com"
+        ],
+        "self": true
+    },
+    "frame-ancesotrs": [],
+    "img-src": {
+        "self": true,
+        "data": true
+    },
+    "media-src": [],
+    "object-src": [],
+    "plugin-types": [],
+    "script-src": {
+        "allow": [
+            "https://www.google-analytics.com"
+        ],
+        "self": true,
+        "unsafe-inline": false,
+        "unsafe-eval": false
+    },
+    "style-src": {
+        "self": true
+    },
+    "upgrade-insecure-requests": true
+}
+```
+
 ## Build a Content Security Policy, programmatically
 
 ```php
@@ -45,5 +93,19 @@ $csp->addSource('image', 'https://ytimg.com');
 $csp->addDirective('upgrade-insecure-requests', true);
 
 $csp->sendCSPHeader();
-
 ```
+
+## Save a CSP header for configuring Apache/nginx
+
+Instead of calling `sendCSPHeader()` on every request, you can build the CSP once
+and save it to a snippet for including in your server configuration:
+
+```php
+$policy = CSPBuilder::fromFile('/path/to/source.json');
+$policy->saveSnippet(
+    '/etc/nginx/snippets/my-csp.conf',
+    CSPBuilder::FORMAT_NGINX
+);
+```
+
+Make sure you reload your webserver afterwards.
