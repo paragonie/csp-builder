@@ -1,5 +1,5 @@
 {
-    "name":         "paragonie/json2csp",
+    "name":         "paragonie/csp-builder",
     "description":  "Easily add and update Content-Security-Policy headers for your project",
     "version":      "1.0.1",
     "keywords": [
