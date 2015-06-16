@@ -72,6 +72,39 @@ class CSPBuilder
     }
     
     /**
+     * Add a source to our allow whitelist
+     * 
+     * @param string $dir
+     * @param string $path
+     */
+    public function addSource($dir, $path)
+    {
+       if (!\preg_match('#\-src$#', $dir)) {
+           $dir .= '-src';
+       }
+       $this->policies[$dir]['allow'][] = $path;
+    }
+    
+    /**
+     * Add a directive if it doesn't already exist
+     * 
+     * If it already exists, do nothing
+     * 
+     * @param string $key
+     * @param mixed $value
+     */
+    public function addDirective($key, $value = null)
+    {
+        if ($value === null) {
+            if (!isset($this->policies[$key])) {
+                $this->policies[$key] = true;
+            }
+        } elseif (empty($this->policies[$key])) {
+            $this->policies[$key] = $value;
+        }
+    }
+    
+    /**
      * Compile a subgroup into a policy string
      * 
      * @param string $directive
@@ -204,28 +237,6 @@ class CSPBuilder
     }
     
     /**
-     * Send the compiled CSP as a header()
-     * 
-     * @return boolean
-     * @throws \Exception
-     */
-    public function sendCSPHeader()
-    {
-        if (\headers_sent()) {
-            throw new \Exception('Headers already sent!');
-        }
-        if ($this->needsCompile) {
-            $this->compile();
-        }
-        // Are we doing a report-only header?
-        $which = $this->reportOnly 
-            ? 'Content-Security-Policy-Report-Only'
-            : 'Content-Security-Policy';
-        
-        \header($which.': '.$this->compiled);
-    }
-    
-    /**
      * Save CSP to a snippet file
      * 
      * @param string $outputFile Output file name
@@ -269,5 +280,38 @@ class CSPBuilder
                 throw new \Exception('Unknown format: '.$format);
         }
         return \file_put_contents($outputFile, $output);
+    }
+    
+    /**
+     * Send the compiled CSP as a header()
+     * 
+     * @return boolean
+     * @throws \Exception
+     */
+    public function sendCSPHeader()
+    {
+        if (\headers_sent()) {
+            throw new \Exception('Headers already sent!');
+        }
+        if ($this->needsCompile) {
+            $this->compile();
+        }
+        // Are we doing a report-only header?
+        $which = $this->reportOnly 
+            ? 'Content-Security-Policy-Report-Only'
+            : 'Content-Security-Policy';
+        
+        \header($which.': '.$this->compiled);
+    }
+    
+    /**
+     * Set a directive
+     * 
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setDirective($key, $value = null)
+    {
+        $this->policies[$key] = $value;
     }
 }

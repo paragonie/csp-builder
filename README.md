@@ -38,8 +38,11 @@ $body .= "</script>";
 // Let's add a hash to the CSP header for $someScript
 $csp->hash('script-src', $someScript, 'sha256');
 
+// Add a new source domain to the whitelist
+$csp->addSource('image', 'https://ytimg.com');
+
 // Let's turn on HTTPS enforcement
-$csp->add('upgrade-insecure-requests');
+$csp->addDirective('upgrade-insecure-requests', true);
 
 $csp->sendCSPHeader();
 
