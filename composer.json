@@ -1,7 +1,7 @@
 {
     "name":         "paragonie/json2csp",
-    "description":  "Compile Content-Security-Policy headers from JSON",
-    "version":      "0.9.1",
+    "description":  "Easily add and update Content-Security-Policy headers for your project",
+    "version":      "1.0.0",
     "keywords": [
             "content-security-policy",
             "csp",
