@@ -1,0 +1,58 @@
+{
+    "report-only": false,
+    "report-uri": "/csp_violation",
+    "base-uri": {
+        "self": true
+    },
+    "default-src": {
+        "self": true
+    },
+    
+    "child-src": {
+        "allow": [
+            "https://www.youtube.com",
+            "https://www.youtube-nocookie.com"
+        ],
+        "self": false
+    },
+    "connect-uri": {
+        "self": true
+    },
+    "font-uri": {
+        "self": true
+    },
+    "form-action": {
+        "allow": [
+            "https://example.com"
+        ],
+        "self": true
+    },
+    "frame-ancesotrs": [],
+    "img-src": {
+        "self": true,
+        "data": true
+    },
+    "media-src": [],
+    "object-src": [],
+    "plugin-types": [],
+    "script-src": {
+        "allow": [
+            "https://ajax.googleapis.com",
+            "https://cdn.mathjax.org",
+            "https://oss.maxcdn.com",
+            "https://www.google-analytics.com"
+        ],
+        "hashes": [
+            {
+                "sha256": "qznLcsROx4GACP2dm0UCKCzCG-HiZ1guq6ZZDob_Tng="
+            }
+        ],
+        "self": true,
+        "unsafe-inline": false,
+        "unsafe-eval": false
+    },
+    "style-src": {
+        "self": true
+    },
+    "upgrade-insecure-requests": true
+}
