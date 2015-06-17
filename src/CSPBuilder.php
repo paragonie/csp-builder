@@ -328,10 +328,12 @@ class CSPBuilder
     /**
      * Send the compiled CSP as a header()
      * 
+     * @param boolean $legacy Send legacy headers?
+     * 
      * @return boolean
      * @throws \Exception
      */
-    public function sendCSPHeader()
+    public function sendCSPHeader($legacy = true)
     {
         if (\headers_sent()) {
             throw new \Exception('Headers already sent!');
@@ -343,8 +345,16 @@ class CSPBuilder
         $which = $this->reportOnly 
             ? 'Content-Security-Policy-Report-Only'
             : 'Content-Security-Policy';
-        
+       
         \header($which.': '.$this->compiled);
+        if ($legacy) {
+            // Add deprecated headers for compatibility with old clients
+            \header('X-'.$which.': '.$this->compiled);
+            $which = $this->reportOnly 
+                ? 'X-Webkit-CSP-Report-Only'
+                : 'X-Webkit-CSP';
+            \header($which.': '.$this->compiled);
+        }
     }
     
     /**
