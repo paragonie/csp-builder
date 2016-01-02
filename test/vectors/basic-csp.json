@@ -7,7 +7,6 @@
     "default-src": {
         "self": true
     },
-    
     "child-src": {
         "allow": [
             "https://www.youtube.com",
