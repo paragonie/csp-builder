@@ -1,5 +1,7 @@
 # Content Security Policy Builder
 
+[![Build Status](https://travis-ci.org/paragonie/csp-builder.svg?branch=master)](https://travis-ci.org/paragonie/csp-builder)
+
 Easily integrate Content-Security-Policy headers into your web application, either
 from a JSON configuration file, or programatically.
 
