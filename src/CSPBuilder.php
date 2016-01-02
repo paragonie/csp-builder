@@ -179,6 +179,16 @@ class CSPBuilder
             foreach ($policies['allow'] as $url) {
                 $url = \filter_var($url, FILTER_SANITIZE_URL);
                 if ($url !== false) {
+                    if ($this->supportOldBrowsers) {
+                        if (strpos($url, '://') === false) {
+                            if (self::isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                                // We only want HTTPS connections here.
+                                $ret .= 'https://'.$url.' ';
+                            } else {
+                                $ret .= 'https://'.$url.' http://'.$url.' ';
+                            }
+                        }
+                    }
                     $ret .= $url.' ';
                 }
             }
@@ -364,6 +374,9 @@ class CSPBuilder
         }
     }
     
+    /**
+     * Disable old browser support (e.g. Safari)
+     */
     public function disableOldBrowserSupport()
     {
         $this->supportOldBrowsers = false;
@@ -378,5 +391,18 @@ class CSPBuilder
     public function setDirective($key, $value = null)
     {
         $this->policies[$key] = $value;
+    }
+    
+    /**
+     * Is this user currently connected over HTTPS?
+     * 
+     * @return bool
+     */
+    protected function isHTTPSconnection()
+    {
+        if (!empty($_SERVER['HTTPS'])) {
+            return $_SERVER['HTTPS'] !== 'off';
+        }
+        return false;
     }
 }
