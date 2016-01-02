@@ -10,6 +10,7 @@ class CSPBuilder
     private $needsCompile = true;
     private $compiled = '';
     private $reportOnly = false;
+    protected $supportOldBrowsers = true;
     
     private static $directives = [
         'base-uri',
@@ -19,6 +20,7 @@ class CSPBuilder
         'font-uri',
         'form-action',
         'frame-ancestors',
+        'frame-src',
         'img-src',
         'media-src',
         'object-src',
@@ -83,6 +85,11 @@ class CSPBuilder
             case 'child':
             case 'frame':
             case 'frame-src':
+                if ($this->supportOldBrowsers) {
+                    $this->policies['child-src']['allow'][] = $path;
+                    $this->policies['frame-src']['allow'][] = $path;
+                    return;
+                }
                 $dir = 'child-src';
                 break;
             case 'connect':
@@ -355,6 +362,11 @@ class CSPBuilder
                 : 'X-Webkit-CSP';
             \header($which.': '.$this->compiled);
         }
+    }
+    
+    public function disableOldBrowserSupport()
+    {
+        $this->supportOldBrowsers = false;
     }
     
     /**
