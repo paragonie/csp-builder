@@ -78,6 +78,8 @@ class CSPBuilder
      * 
      * @param string $dir
      * @param string $path
+     * 
+     * @return CSPBuilder
      */
     public function addSource($dir, $path)
     {
@@ -88,7 +90,7 @@ class CSPBuilder
                 if ($this->supportOldBrowsers) {
                     $this->policies['child-src']['allow'][] = $path;
                     $this->policies['frame-src']['allow'][] = $path;
-                    return;
+                    return $this;
                 }
                 $dir = 'child-src';
                 break;
@@ -133,6 +135,7 @@ class CSPBuilder
                 break;
         }
         $this->policies[$dir]['allow'][] = $path;
+        return $this;
     }
     
     /**
@@ -142,6 +145,8 @@ class CSPBuilder
      * 
      * @param string $key
      * @param mixed $value
+     * 
+     * @return CSPBuilder
      */
     public function addDirective($key, $value = null)
     {
@@ -153,78 +158,30 @@ class CSPBuilder
             $this->policies[$key] = $value;
         }
     }
+    /**
+     * Disable old browser support (e.g. Safari)
+     * 
+     * @return CSPBuilder
+     */
+    public function disableOldBrowserSupport()
+    {
+        $this->needsCompile = $this->supportOldBrowsers !== false;
+        $this->supportOldBrowsers = false;
+        return $this;
+    }
     
     /**
-     * Compile a subgroup into a policy string
+     * Enable old browser support (e.g. Safari)
      * 
-     * @param string $directive
-     * @param mixed $policies
+     * This is enabled by default
      * 
-     * @return string
+     * @return CSPBuilder
      */
-    protected function compileSubgroup($directive, $policies = null)
+    public function enableOldBrowserSupport()
     {
-        if ($policies === '*') {
-            // Don't even waste the overhead adding this to the header
-            return '';
-        } elseif (empty($policies)) {
-            return $directive.": 'none'; ";
-        }
-        $ret = $directive.': ';
-        if (!empty($policies['self'])) {
-            $ret .= "'self' ";
-        }
-        
-        if (!empty($policies['allow'])) {
-            foreach ($policies['allow'] as $url) {
-                $url = \filter_var($url, FILTER_SANITIZE_URL);
-                if ($url !== false) {
-                    if ($this->supportOldBrowsers) {
-                        if (strpos($url, '://') === false) {
-                            if (self::isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
-                                // We only want HTTPS connections here.
-                                $ret .= 'https://'.$url.' ';
-                            } else {
-                                $ret .= 'https://'.$url.' http://'.$url.' ';
-                            }
-                        }
-                    }
-                    $ret .= $url.' ';
-                }
-            }
-        }
-        
-        if (!empty($policies['hashes'])) {
-            foreach ($policies['hashes'] as $hash) {
-                foreach ($hash as $algo => $hashval) {
-                    $ret .= \implode('', [
-                        "'hash-",
-                        \preg_replace('/[^A-Za-z0-9]/', '', $algo),
-                        '-',
-                        \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $hashval),
-                        "' "
-                    ]);
-                }
-            }
-        }
-        
-        if (!empty($policies['nonces'])) {
-            foreach ($policies['nonces'] as $nonce) {
-                $ret .= \implode('', [
-                    "'nonce-",
-                    \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $nonce),
-                    "' "
-                ]);
-            }
-        }
-        
-        if (!empty($policies['unsafe-inline'])) {
-            $ret .= "'unsafe-inline' ";
-        }
-        if (!empty($policies['unsafe-eval'])) {
-            $ret .= "'unsafe-eval'";
-        }
-        return \rtrim($ret, ' ').'; ';
+        $this->needsCompile = $this->supportOldBrowsers !== true;
+        $this->supportOldBrowsers = true;
+        return $this;
     }
     
     /**
@@ -375,22 +332,90 @@ class CSPBuilder
     }
     
     /**
-     * Disable old browser support (e.g. Safari)
-     */
-    public function disableOldBrowserSupport()
-    {
-        $this->supportOldBrowsers = false;
-    }
-    
-    /**
      * Set a directive
      * 
      * @param string $key
      * @param mixed $value
+     * 
+     * @return CSPBuilder
      */
     public function setDirective($key, $value = null)
     {
         $this->policies[$key] = $value;
+        return $this;
+    }
+    
+    /**
+     * Compile a subgroup into a policy string
+     * 
+     * @param string $directive
+     * @param mixed $policies
+     * 
+     * @return string
+     */
+    protected function compileSubgroup($directive, $policies = null)
+    {
+        if ($policies === '*') {
+            // Don't even waste the overhead adding this to the header
+            return '';
+        } elseif (empty($policies)) {
+            return $directive.": 'none'; ";
+        }
+        $ret = $directive.': ';
+        if (!empty($policies['self'])) {
+            $ret .= "'self' ";
+        }
+        
+        if (!empty($policies['allow'])) {
+            foreach ($policies['allow'] as $url) {
+                $url = \filter_var($url, FILTER_SANITIZE_URL);
+                if ($url !== false) {
+                    if ($this->supportOldBrowsers) {
+                        if (strpos($url, '://') === false) {
+                            if (self::isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                                // We only want HTTPS connections here.
+                                $ret .= 'https://'.$url.' ';
+                            } else {
+                                $ret .= 'https://'.$url.' http://'.$url.' ';
+                            }
+                        }
+                    }
+                    $ret .= $url.' ';
+                }
+            }
+        }
+        
+        if (!empty($policies['hashes'])) {
+            foreach ($policies['hashes'] as $hash) {
+                foreach ($hash as $algo => $hashval) {
+                    $ret .= \implode('', [
+                        "'hash-",
+                        \preg_replace('/[^A-Za-z0-9]/', '', $algo),
+                        '-',
+                        \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $hashval),
+                        "' "
+                    ]);
+                }
+            }
+        }
+        
+        if (!empty($policies['nonces'])) {
+            foreach ($policies['nonces'] as $nonce) {
+                $ret .= \implode('', [
+                    "'nonce-",
+                    \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $nonce),
+                    "' "
+                ]);
+            }
+        }
+        
+        if (!empty($policies['unsafe-inline'])) {
+            $ret .= "'unsafe-inline' ";
+        }
+        if (!empty($policies['unsafe-eval'])) {
+            $ret .= "'unsafe-eval'";
+        }
+        return \rtrim($ret, ' ').'; ';
     }
     
     /**

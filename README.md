@@ -86,7 +86,7 @@ $body .= "<script nonce={$nonce}>";
 $body .= "</script>";
 
 // Let's add a hash to the CSP header for $someScript
-$csp->hash('script-src', $someScript, 'sha256');
+$hash = $csp->hash('script-src', $someScript, 'sha256');
 
 // Add a new source domain to the whitelist
 $csp->addSource('image', 'https://ytimg.com');
@@ -96,6 +96,22 @@ $csp->addDirective('upgrade-insecure-requests', true);
 
 $csp->sendCSPHeader();
 ```
+
+Note that many of these methods can be chained together:
+
+```php
+$csp = CSPBuilder::fromFile('/path/to/source.json');
+$csp->addSource('image', 'https://ytimg.com')
+    ->addSource('frame', 'https://youtube.com')
+    ->addDirective('upgrade-insecure-requests', true)
+    ->sendCSPHeader();
+```
+
+* `addSource()`
+* `addDirective()`
+* `disableOldBrowserSupport()`
+* `enableOldBrowserSupport()`
+* `setDirective()`
 
 ## Save a CSP header for configuring Apache/nginx
 
