@@ -1,5 +1,7 @@
 <?php
 use ParagonIE\CSPBuilder\CSPBuilder;
+use Psr\Http\Message\MessageInterface;
+
 /**
  * 
  */
@@ -42,5 +44,53 @@ class BasicTest extends PHPUnit_Framework_TestCase
                 'Content-Security-Policy' => $noOld
             ]
         );
+    }
+
+    public function testInjectCSPHeaderWithoutLegacy()
+    {
+        $modifiedMessage = $this->getMock(MessageInterface::class, ['withAddedHeader']);
+        $message         = $this->getMock(MessageInterface::class, ['withAddedHeader']);
+        $basic           = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
+
+        $header = $basic
+            ->disableOldBrowserSupport()
+            ->compile();
+        $message
+            ->expects(self::once())
+            ->method('withAddedHeader')
+            ->with('Content-Security-Policy', $header)
+            ->willReturn($modifiedMessage);
+
+        self::assertSame($modifiedMessage, $basic->injectCSPHeader($message));
+    }
+
+    public function testInjectCSPHeaderWithLegacy()
+    {
+        $originalMessage  = $this->getMock(MessageInterface::class, ['withAddedHeader']);
+        $modifiedMessage1 = $this->getMock(MessageInterface::class, ['withAddedHeader']);
+        $modifiedMessage2 = $this->getMock(MessageInterface::class, ['withAddedHeader']);
+        $modifiedMessage3 = $this->getMock(MessageInterface::class, ['withAddedHeader']);
+        $basic            = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
+
+        $header = $basic
+            ->disableOldBrowserSupport()
+            ->compile();
+        $originalMessage
+            ->expects(self::once())
+            ->method('withAddedHeader')
+            ->with('Content-Security-Policy', $header)
+            ->willReturn($modifiedMessage1);
+        $modifiedMessage1
+            ->expects(self::once())
+            ->method('withAddedHeader')
+            ->with('X-Content-Security-Policy', $header)
+            ->willReturn($modifiedMessage2);
+        $modifiedMessage2
+            ->expects(self::once())
+            ->method('withAddedHeader')
+            ->with('X-Webkit-CSP', $header)
+            ->willReturn($modifiedMessage3);
+
+        self::assertSame($modifiedMessage3, $basic->injectCSPHeader($originalMessage, true));
     }
 }
