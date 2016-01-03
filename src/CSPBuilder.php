@@ -26,6 +26,7 @@ class CSPBuilder
         'img-src',
         'media-src',
         'object-src',
+        'plugin-types',
         'script-src',
         'style-src'
     ];
@@ -160,6 +161,21 @@ class CSPBuilder
             $this->policies[$key] = $value;
         }
     }
+    
+    /**
+     * Add a plugin type to be added
+     * 
+     * @param string $mime
+     * @return CSPBuilder
+     */
+    public function allowPluginType($mime = 'text/plain')
+    {
+        $this->policies['plugin-types']['types'] []= $mime;
+        
+        $this->needsCompile = true;
+        return $this;
+    }
+    
     /**
      * Disable old browser support (e.g. Safari)
      * 
@@ -438,6 +454,12 @@ class CSPBuilder
                     \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $nonce),
                     "' "
                 ]);
+            }
+        }
+        
+        if (!empty($policies['types'])) {
+            foreach ($policies['types'] as $type) {
+                $ret .= $type.' ';
             }
         }
         
