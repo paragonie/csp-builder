@@ -216,9 +216,10 @@ class CSPBuilder
     }
     
     /**
+     * Get an associative array of headers to return.
      * 
      * @param type $legacy
-     * @return array
+     * @return string[]
      */
     public function getHeaderArray($legacy = true)
     {
@@ -282,7 +283,7 @@ class CSPBuilder
         if (\in_array($directive, $ruleKeys)) {
             if (empty($nonce)) {
                 $nonce = \base64_encode(
-                    \openssl_random_pseudo_bytes(18)
+                    \random_bytes(18)
                 );
             }
             $this->policies[$directive]['nonces'] []= $nonce;
@@ -407,7 +408,11 @@ class CSPBuilder
                             }
                         }
                     }
-                    $ret .= $url.' ';
+                    if (self::isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                        $ret .= \str_replace('http://', 'https://', $url).' ';
+                    } else {
+                        $ret .= $url.' ';
+                    }
                 }
             }
         }
