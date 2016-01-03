@@ -415,8 +415,8 @@ class CSPBuilder
                 $url = \filter_var($url, FILTER_SANITIZE_URL);
                 if ($url !== false) {
                     if ($this->supportOldBrowsers) {
-                        if (strpos($url, '://') === false) {
-                            if (self::isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                        if (\strpos($url, '://') === false) {
+                            if ($this->isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
                                 // We only want HTTPS connections here.
                                 $ret .= 'https://'.$url.' ';
                             } else {
@@ -424,7 +424,7 @@ class CSPBuilder
                             }
                         }
                     }
-                    if (self::isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                    if ($this->isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
                         $ret .= \str_replace('http://', 'https://', $url).' ';
                     } else {
                         $ret .= $url.' ';
@@ -480,11 +480,14 @@ class CSPBuilder
      */
     protected function getHeaderKeys($legacy = true)
     {
+        // We always want this
         $return = [
             $this->reportOnly 
                 ? 'Content-Security-Policy-Report-Only'
                 : 'Content-Security-Policy'
         ];
+        
+        // If we're supporting legacy devices, include these too:
         if ($legacy) {
             $return []= $this->reportOnly 
                 ? 'X-Content-Security-Policy-Report-Only'
