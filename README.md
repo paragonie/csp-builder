@@ -111,7 +111,17 @@ $csp->addSource('image', 'https://ytimg.com')
 * `addDirective()`
 * `disableOldBrowserSupport()`
 * `enableOldBrowserSupport()`
+* `hash()`
 * `setDirective()`
+
+## Inject a CSP header into a PSR-7 message
+
+Instead of invoking `sendCSPHeader()`, you can instead inject the headers into
+your PSR-7 message object by calling it like so:
+
+```php
+$csp->injectCSPHeader($yourMessageHere);
+```
 
 ## Save a CSP header for configuring Apache/nginx
 

@@ -1,6 +1,8 @@
 <?php
 namespace ParagonIE\CSPBuilder;
 
+use \Psr\Http\Message\MessageInterface;
+
 class CSPBuilder
 {
     const FORMAT_APACHE = 'apache';
@@ -215,6 +217,22 @@ class CSPBuilder
     
     /**
      * 
+     * @param type $legacy
+     * @return array
+     */
+    public function getHeaderArray($legacy = true)
+    {
+        if ($this->needsCompile) {
+            $this->compile();
+        }
+        $return = [];
+        foreach ($this->getHeaderKeys($legacy) as $key) {
+            $return[$key] = $this->compiled;
+        }
+        return $return;
+    }
+    
+    /**
      * Add a new nonce to the existing CSP
      * 
      * @param string $directive
@@ -231,6 +249,25 @@ class CSPBuilder
                 $algo => \strtr('+/', '-_', $hash)
             ];
         }
+        return $this;
+    }
+    
+    /**
+     * PSR-7 header injection
+     * 
+     * @param \Psr\Http\Message\MessageInterface $message
+     * @param bool $legacy
+     * @return \Psr\Http\Message\MessageInterface
+     */
+    function injectCSPHeader(MessageInterface $message, $legacy = false)
+    {
+        if ($this->needsCompile) {
+            $this->compile();
+        }
+        foreach ($this->getHeaderKeys($legacy) as $key) {
+            $message = $message->withAddedHeader($key, $this->compiled);
+        }
+        return $message;
     }
     
     /**
@@ -315,20 +352,10 @@ class CSPBuilder
         if ($this->needsCompile) {
             $this->compile();
         }
-        // Are we doing a report-only header?
-        $which = $this->reportOnly 
-            ? 'Content-Security-Policy-Report-Only'
-            : 'Content-Security-Policy';
-       
-        \header($which.': '.$this->compiled);
-        if ($legacy) {
-            // Add deprecated headers for compatibility with old clients
-            \header('X-'.$which.': '.$this->compiled);
-            $which = $this->reportOnly 
-                ? 'X-Webkit-CSP-Report-Only'
-                : 'X-Webkit-CSP';
-            \header($which.': '.$this->compiled);
+        foreach ($this->getHeaderKeys($legacy) as $key) {
+            \header($key.': '.$this->compiled);
         }
+        return true;
     }
     
     /**
@@ -416,6 +443,30 @@ class CSPBuilder
             $ret .= "'unsafe-eval'";
         }
         return \rtrim($ret, ' ').'; ';
+    }
+    
+    /**
+     * Get an array of header keys to return
+     * 
+     * @param bool $legacy
+     * @return array
+     */
+    protected function getHeaderKeys($legacy = true)
+    {
+        $return = [
+            $this->reportOnly 
+                ? 'Content-Security-Policy-Report-Only'
+                : 'Content-Security-Policy'
+        ];
+        if ($legacy) {
+            $return []= $this->reportOnly 
+                ? 'X-Content-Security-Policy-Report-Only'
+                : 'X-Content-Security-Policy';
+            $return []= $this->reportOnly 
+                ? 'X-Webkit-CSP-Report-Only'
+                : 'X-Webkit-CSP';
+        }
+        return $return;
     }
     
     /**
