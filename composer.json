@@ -27,6 +27,7 @@
         }
     },
     "require": {
+        "php": "^5.5|^7.0",
         "paragonie/random_compat": "^1.1.4"
     },
     "require-dev": {
