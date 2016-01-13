@@ -469,6 +469,9 @@ class CSPBuilder
         if (!empty($policies['unsafe-eval'])) {
             $ret .= "'unsafe-eval'";
         }
+        if (!empty($policies['data'])) {
+            $ret .= "data: ";
+        }
         return \rtrim($ret, ' ').'; ';
     }
     
