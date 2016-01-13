@@ -45,6 +45,16 @@ class BasicTest extends PHPUnit_Framework_TestCase
             ]
         );
     }
+    
+    public function testHash()
+    {
+        $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
+        $basic->hash('script-src', 'Yellow Submarine', 'sha384');
+        $this->assertEquals(
+            file_get_contents(__DIR__.'/vectors/basic-csp-hash.out'),
+            $basic->getCompiledHeader()
+        );
+    }
 
     public function testInjectCSPHeaderWithoutLegacy()
     {

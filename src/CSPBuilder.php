@@ -263,7 +263,7 @@ class CSPBuilder
         if (\in_array($directive, $ruleKeys)) {
             $hash = \base64_encode(\hash($algo, $script, true));
             $this->policies[$directive]['hashes'] []= [
-                $algo => \strtr('+/', '-_', $hash)
+                $algo => \strtr($hash, '+/', '-_')
             ];
         }
         return $this;
