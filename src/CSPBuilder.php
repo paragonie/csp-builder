@@ -403,9 +403,9 @@ class CSPBuilder
             // Don't even waste the overhead adding this to the header
             return '';
         } elseif (empty($policies)) {
-            return $directive.": 'none'; ";
+            return $directive." 'none'; ";
         }
-        $ret = $directive.': ';
+        $ret = $directive.' ';
         if (!empty($policies['self'])) {
             $ret .= "'self' ";
         }
