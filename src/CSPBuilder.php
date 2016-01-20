@@ -250,7 +250,7 @@ class CSPBuilder
     }
     
     /**
-     * Add a new nonce to the existing CSP
+     * Add a new hash to the existing CSP
      * 
      * @param string $directive
      * @param string $script
@@ -262,6 +262,25 @@ class CSPBuilder
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
             $hash = \base64_encode(\hash($algo, $script, true));
+            $this->policies[$directive]['hashes'] []= [
+                $algo => \strtr($hash, '+/', '-_')
+            ];
+        }
+        return $this;
+    }
+    
+    /**
+     * Add a new (precalculated) hash to the existing CSP
+     * 
+     * @param string $directive
+     * @param string $hash
+     * @param string $algo
+     * @return string
+     */
+    public function preHash($directive = 'script-src', $hash = '', $algo = 'sha256')
+    {
+        $ruleKeys = \array_keys($this->policies);
+        if (\in_array($directive, $ruleKeys)) {
             $this->policies[$directive]['hashes'] []= [
                 $algo => \strtr($hash, '+/', '-_')
             ];
