@@ -456,7 +456,7 @@ class CSPBuilder
             foreach ($policies['hashes'] as $hash) {
                 foreach ($hash as $algo => $hashval) {
                     $ret .= \implode('', [
-                        "'hash-",
+                        "'",
                         \preg_replace('/[^A-Za-z0-9]/', '', $algo),
                         '-',
                         \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $hashval),
