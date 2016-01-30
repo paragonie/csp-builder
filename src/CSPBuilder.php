@@ -458,7 +458,7 @@ class CSPBuilder
                         "'",
                         \preg_replace('/[^A-Za-z0-9]/', '', $algo),
                         '-',
-                        \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $hashval),
+                        \preg_replace('/[^A-Za-z0-9\+\/=]/', '', $hashval),
                         "' "
                     ]);
                 }
@@ -469,7 +469,7 @@ class CSPBuilder
             foreach ($policies['nonces'] as $nonce) {
                 $ret .= \implode('', [
                     "'nonce-",
-                    \preg_replace('/[^A-Za-z0-9_\+\.\/=]/', '', $nonce),
+                    \preg_replace('/[^A-Za-z0-9\+\/=]/', '', $nonce),
                     "' "
                 ]);
             }
