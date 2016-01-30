@@ -270,7 +270,7 @@ class CSPBuilder
     }
     
     /**
-     * Add a new (precalculated) raw hash to the existing CSP
+     * Add a new (precalculated) base64-encoded hash to the existing CSP
      * 
      * @param string $directive
      * @param string $hash
