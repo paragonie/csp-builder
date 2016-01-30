@@ -261,9 +261,8 @@ class CSPBuilder
     {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
-            $hash = \base64_encode(\hash($algo, $script, true));
             $this->policies[$directive]['hashes'] []= [
-                $algo => \strtr($hash, '+/', '-_')
+                $algo => \base64_encode(\hash($algo, $script, true))
             ];
         }
         return $this;
@@ -282,7 +281,7 @@ class CSPBuilder
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
             $this->policies[$directive]['hashes'] []= [
-                $algo => \strtr($hash, '+/', '-_')
+                $algo => $hash
             ];
         }
         return $this;
