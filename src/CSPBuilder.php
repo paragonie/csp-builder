@@ -426,7 +426,7 @@ class CSPBuilder
         $ret = $directive.' ';
         if ($directive === 'plugin-types') {
             // Expects MIME types, not URLs
-            return $ret . \implode(' ', $policies['allow']);
+            return $ret . \implode(' ', $policies['allow']).'; ';
         }
         if (!empty($policies['self'])) {
             $ret .= "'self' ";
