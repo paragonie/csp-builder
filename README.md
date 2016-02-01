@@ -132,6 +132,24 @@ your PSR-7 message object by calling it like so:
 $csp->injectCSPHeader($yourMessageHere);
 ```
 
+## Using CSP as a PSR-7 Middleware
+The CSPMiddleware class supports the following method signature.
+```php
+public function __invoke(ServerRequestInterface $requestInterface, ResponseInterface $responseInterface, callable $next)
+```
+
+### Example
+```php
+//Build from the Middleware Class
+$csp = CSPMiddleware::fromFile('/path/to/source.json');
+
+//Add to your applcation [Slim 3 example]
+$app->add($csp);
+
+//Add to a specific route [Slim 3 example]
+$app->get('...', ... )->add($csp);
+```
+
 ## Save a CSP header for configuring Apache/nginx
 
 Instead of calling `sendCSPHeader()` on every request, you can build the CSP once
