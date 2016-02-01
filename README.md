@@ -120,6 +120,10 @@ Instead of invoking `sendCSPHeader()`, you can instead inject the headers into
 your PSR-7 message object by calling it like so:
 
 ```php
+/**
+ * $yourMessageHere is an instance of an object that implements 
+ * \Psr\Http\Message\MessageInterface
+ */
 $csp->injectCSPHeader($yourMessageHere);
 ```
 
