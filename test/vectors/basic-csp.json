@@ -14,10 +14,10 @@
         ],
         "self": false
     },
-    "connect-uri": {
+    "connect-src": {
         "self": true
     },
-    "font-uri": {
+    "font-src": {
         "self": true
     },
     "form-action": {
