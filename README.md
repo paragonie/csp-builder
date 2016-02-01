@@ -37,8 +37,8 @@ $csp->sendCSPHeader();
         ],
         "self": false
     },
-    "connect-uri": [],
-    "font-uri": {
+    "connect-src": [],
+    "font-src": {
         "self": true
     },
     "form-action": {
