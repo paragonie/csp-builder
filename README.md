@@ -123,6 +123,11 @@ your PSR-7 message object by calling it like so:
 /**
  * $yourMessageHere is an instance of an object that implements 
  * \Psr\Http\Message\MessageInterface
+ *
+ * Typically, this will be a Response object that implements 
+ * \Psr\Http\Message\ResponseInterface
+ *
+ * @ref https://github.com/guzzle/psr7/blob/master/src/Response.php
  */
 $csp->injectCSPHeader($yourMessageHere);
 ```
