@@ -424,6 +424,9 @@ class CSPBuilder
             // Don't even waste the overhead adding this to the header
             return '';
         } elseif (empty($policies)) {
+            if ($directive === 'plugin-types') {
+                return '';
+            }
             return $directive." 'none'; ";
         }
         $ret = $directive.' ';
