@@ -201,10 +201,10 @@ class CSPBuilder
         $this->supportOldBrowsers = true;
         return $this;
     }
-    
+
     /**
      * Factory method - create a new CSPBuilder object from a JSON file
-     * 
+     *
      * @param string $filename
      * @return CSPBuilder
      */
@@ -234,7 +234,7 @@ class CSPBuilder
     /**
      * Get an associative array of headers to return.
      * 
-     * @param type $legacy
+     * @param bool $legacy
      * @return string[]
      */
     public function getHeaderArray($legacy = true)
@@ -304,30 +304,33 @@ class CSPBuilder
         }
         return $message;
     }
-    
+
     /**
      * Add a new nonce to the existing CSP
-     * 
+     *
      * @param string $directive
      * @param string $nonce (if NULL, will be generated)
+     * @return null|string
      */
     public function nonce($directive = 'script-src', $nonce = null)
     {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
-            if (empty($nonce)) {
-                $nonce = \base64_encode(
-                    \random_bytes(18)
-                );
-            }
-            $this->policies[$directive]['nonces'] []= $nonce;
-            return $nonce;
+            return null;
         }
+
+        if (empty($nonce)) {
+            $nonce = \base64_encode(
+                \random_bytes(18)
+            );
+        }
+        $this->policies[$directive]['nonces'] []= $nonce;
+        return $nonce;
     }
-    
+
     /**
      * Save CSP to a snippet file
-     * 
+     *
      * @param string $outputFile Output file name
      * @param string $format Which format are we saving in?
      * @return int|boolean
