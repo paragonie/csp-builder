@@ -315,7 +315,7 @@ class CSPBuilder
     public function nonce($directive = 'script-src', $nonce = null)
     {
         $ruleKeys = \array_keys($this->policies);
-        if (\in_array($directive, $ruleKeys)) {
+        if (!\in_array($directive, $ruleKeys)) {
             return null;
         }
 
