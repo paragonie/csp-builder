@@ -57,6 +57,11 @@ class CSPBuilder
         
         foreach(self::$directives as $dir) {
             if (\in_array($dir, $ruleKeys)) {
+                if (empty($ruleKeys)) {
+                    if ($dir === 'base-uri') {
+                        continue;
+                    }
+                }
                 $compiled []= $this->compileSubgroup(
                     $dir,
                     $this->policies[$dir]
