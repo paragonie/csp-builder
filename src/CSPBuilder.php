@@ -500,7 +500,7 @@ class CSPBuilder
             $ret .= "'unsafe-inline' ";
         }
         if (!empty($policies['unsafe-eval'])) {
-            $ret .= "'unsafe-eval'";
+            $ret .= "'unsafe-eval' ";
         }
         if (!empty($policies['data'])) {
             $ret .= "data: ";
