@@ -1,6 +1,8 @@
 <?php
+declare(strict_types=1);
 namespace ParagonIE\CSPBuilder;
 
+use \ParagonIE\ConstantTime\Base64;
 use \Psr\Http\Message\MessageInterface;
 
 class CSPBuilder
@@ -44,7 +46,7 @@ class CSPBuilder
      * 
      * @return string
      */
-    public function compile()
+    public function compile(): string
     {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array('report-only', $ruleKeys)) {
@@ -84,14 +86,14 @@ class CSPBuilder
     /**
      * Add a source to our allow whitelist
      * 
-     * @param string $dir
+     * @param string $directive
      * @param string $path
      * 
      * @return CSPBuilder
      */
-    public function addSource($dir, $path)
+    public function addSource(string $directive, string $path): self
     {
-        switch ($dir) {
+        switch ($directive) {
             case 'child':
             case 'frame':
             case 'frame-src':
@@ -100,49 +102,49 @@ class CSPBuilder
                     $this->policies['frame-src']['allow'][] = $path;
                     return $this;
                 }
-                $dir = 'child-src';
+                $directive = 'child-src';
                 break;
             case 'connect':
             case 'socket':
             case 'websocket':
-                $dir = 'connect-src';
+                $directive = 'connect-src';
                 break;
             case 'font':
             case 'fonts':
-                $dir = 'font-src';
+                $directive = 'font-src';
                 break;
             case 'form':
             case 'forms':
-                $dir = 'form-action';
+                $directive = 'form-action';
                 break;
             case 'ancestor':
             case 'parent':
-                $dir = 'frame-ancestors';
+                $directive = 'frame-ancestors';
                 break;
             case 'img':
             case 'image':
             case 'image-src':
-                $dir = 'img-src';
+                $directive = 'img-src';
                 break;
             case 'media':
-                $dir = 'media-src';
+                $directive = 'media-src';
                 break;
             case 'object':
-                $dir = 'object-src';
+                $directive = 'object-src';
                 break;
             case 'js':
             case 'javascript':
             case 'script':
             case 'scripts':
-                $dir = 'script-src';
+                $directive = 'script-src';
                 break;
             case 'style':
             case 'css':
             case 'css-src':
-                $dir = 'style-src';
+                $directive = 'style-src';
                 break;
         }
-        $this->policies[$dir]['allow'][] = $path;
+        $this->policies[$directive]['allow'][] = $path;
         return $this;
     }
     
@@ -156,7 +158,7 @@ class CSPBuilder
      * 
      * @return CSPBuilder
      */
-    public function addDirective($key, $value = null)
+    public function addDirective(string $key, $value = null): self
     {
         if ($value === null) {
             if (!isset($this->policies[$key])) {
@@ -165,6 +167,7 @@ class CSPBuilder
         } elseif (empty($this->policies[$key])) {
             $this->policies[$key] = $value;
         }
+        return $this;
     }
     
     /**
@@ -173,7 +176,7 @@ class CSPBuilder
      * @param string $mime
      * @return CSPBuilder
      */
-    public function allowPluginType($mime = 'text/plain')
+    public function allowPluginType(string $mime = 'text/plain'): self
     {
         $this->policies['plugin-types']['types'] []= $mime;
         
@@ -186,7 +189,7 @@ class CSPBuilder
      * 
      * @return CSPBuilder
      */
-    public function disableOldBrowserSupport()
+    public function disableOldBrowserSupport(): self
     {
         $this->needsCompile = $this->supportOldBrowsers !== false;
         $this->supportOldBrowsers = false;
@@ -200,7 +203,7 @@ class CSPBuilder
      * 
      * @return CSPBuilder
      */
-    public function enableOldBrowserSupport()
+    public function enableOldBrowserSupport(): self
     {
         $this->needsCompile = $this->supportOldBrowsers !== true;
         $this->supportOldBrowsers = true;
@@ -212,8 +215,9 @@ class CSPBuilder
      *
      * @param string $filename
      * @return CSPBuilder
+     * @throws \Exception
      */
-    public static function fromFile($filename = '')
+    public static function fromFile(string $filename = ''): self
     {
         if (!file_exists($filename)) {
             throw new \Exception($filename.' does not exist');
@@ -228,7 +232,7 @@ class CSPBuilder
      * 
      * @return string
      */
-    public function getCompiledHeader()
+    public function getCompiledHeader(): string
     {
         if ($this->needsCompile) {
             $this->compile();
@@ -242,7 +246,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return string[]
      */
-    public function getHeaderArray($legacy = true)
+    public function getHeaderArray(bool $legacy = true): array
     {
         if ($this->needsCompile) {
             $this->compile();
@@ -259,34 +263,40 @@ class CSPBuilder
      * 
      * @param string $directive
      * @param string $script
-     * @param string $algo
-     * @return string
+     * @param string $algorithm
+     * @return CSPBuilder
      */
-    public function hash($directive = 'script-src', $script = '', $algo = 'sha256')
-    {
+    public function hash(
+        string $directive = 'script-src',
+        string $script = '',
+        string $algorithm = 'sha384'
+    ): self {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
             $this->policies[$directive]['hashes'] []= [
-                $algo => \base64_encode(\hash($algo, $script, true))
+                $algorithm => \base64_encode(\hash($algorithm, $script, true))
             ];
         }
         return $this;
     }
     
     /**
-     * Add a new (precalculated) base64-encoded hash to the existing CSP
+     * Add a new (pre-calculated) base64-encoded hash to the existing CSP
      * 
      * @param string $directive
      * @param string $hash
-     * @param string $algo
-     * @return string
+     * @param string $algorithm
+     * @return CSPBuilder
      */
-    public function preHash($directive = 'script-src', $hash = '', $algo = 'sha256')
-    {
+    public function preHash(
+        string $directive = 'script-src',
+        string $hash = '',
+        string $algorithm = 'sha384'
+    ): self {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
             $this->policies[$directive]['hashes'] []= [
-                $algo => $hash
+                $algorithm => $hash
             ];
         }
         return $this;
@@ -299,7 +309,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return \Psr\Http\Message\MessageInterface
      */
-    function injectCSPHeader(MessageInterface $message, $legacy = false)
+    function injectCSPHeader(MessageInterface $message, bool $legacy = false): MessageInterface
     {
         if ($this->needsCompile) {
             $this->compile();
@@ -314,10 +324,10 @@ class CSPBuilder
      * Add a new nonce to the existing CSP
      *
      * @param string $directive
-     * @param string $nonce (if NULL, will be generated)
+     * @param string $nonce (if empty, it will be generated)
      * @return null|string
      */
-    public function nonce($directive = 'script-src', $nonce = null)
+    public function nonce(string $directive = 'script-src', string $nonce = ''): string
     {
         $ruleKeys = \array_keys($this->policies);
         if (!\in_array($directive, $ruleKeys)) {
@@ -325,9 +335,7 @@ class CSPBuilder
         }
 
         if (empty($nonce)) {
-            $nonce = \base64_encode(
-                \random_bytes(18)
-            );
+            $nonce = Base64::encode(\random_bytes(18));
         }
         $this->policies[$directive]['nonces'] []= $nonce;
         return $nonce;
@@ -338,10 +346,13 @@ class CSPBuilder
      *
      * @param string $outputFile Output file name
      * @param string $format Which format are we saving in?
-     * @return int|boolean
+     * @return bool
+     * @throws \Exception
      */
-    public function saveSnippet($outputFile, $format = self::FORMAT_NGINX)
-    {
+    public function saveSnippet(
+        string $outputFile,
+        string $format = self::FORMAT_NGINX
+    ): bool {
         if ($this->needsCompile) {
             $this->compile();
         }
@@ -376,7 +387,7 @@ class CSPBuilder
             default:
                 throw new \Exception('Unknown format: '.$format);
         }
-        return \file_put_contents($outputFile, $output);
+        return \file_put_contents($outputFile, $output) !== false;
     }
     
     /**
@@ -387,7 +398,7 @@ class CSPBuilder
      * @return boolean
      * @throws \Exception
      */
-    public function sendCSPHeader($legacy = true)
+    public function sendCSPHeader(bool $legacy = true): bool
     {
         if (\headers_sent()) {
             throw new \Exception('Headers already sent!');
@@ -409,7 +420,7 @@ class CSPBuilder
      * 
      * @return CSPBuilder
      */
-    public function setDirective($key, $value = null)
+    public function setDirective(string $key, $value = null): self
     {
         $this->policies[$key] = $value;
         return $this;
@@ -423,7 +434,7 @@ class CSPBuilder
      * 
      * @return string
      */
-    protected function compileSubgroup($directive, $policies = null)
+    protected function compileSubgroup(string $directive, $policies = null): string
     {
         if ($policies === '*') {
             // Don't even waste the overhead adding this to the header
@@ -449,7 +460,7 @@ class CSPBuilder
                 if ($url !== false) {
                     if ($this->supportOldBrowsers) {
                         if (\strpos($url, '://') === false) {
-                            if ($this->isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                            if ($this->isHTTPSConnection() || !empty($this->policies['upgrade-insecure-requests'])) {
                                 // We only want HTTPS connections here.
                                 $ret .= 'https://'.$url.' ';
                             } else {
@@ -457,7 +468,7 @@ class CSPBuilder
                             }
                         }
                     }
-                    if ($this->isHTTPSconnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                    if ($this->isHTTPSConnection() || !empty($this->policies['upgrade-insecure-requests'])) {
                         $ret .= \str_replace('http://', 'https://', $url).' ';
                     } else {
                         $ret .= $url.' ';
@@ -514,7 +525,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return array
      */
-    protected function getHeaderKeys($legacy = true)
+    protected function getHeaderKeys(bool $legacy = true): array
     {
         // We always want this
         $return = [
@@ -540,7 +551,7 @@ class CSPBuilder
      * 
      * @return bool
      */
-    protected function isHTTPSconnection()
+    protected function isHTTPSConnection(): bool
     {
         if (!empty($_SERVER['HTTPS'])) {
             return $_SERVER['HTTPS'] !== 'off';
