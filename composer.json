@@ -4,6 +4,9 @@
     "keywords": [
             "content-security-policy",
             "csp",
+            "http",
+            "headers",
+            "security",
             "xss"
         ],
     "license":      "MIT",
@@ -31,6 +34,7 @@
         "paragonie/constant_time_encoding": "^2.0"
     },
     "require-dev": {
+        "psr/http-message": "^1",
         "phpunit/phpunit": "4.*|5.*"
     },
     "suggest": {
