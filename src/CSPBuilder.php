@@ -165,6 +165,7 @@ class CSPBuilder
         } elseif (empty($this->policies[$key])) {
             $this->policies[$key] = $value;
         }
+        return $this;
     }
     
     /**
@@ -212,15 +213,16 @@ class CSPBuilder
      *
      * @param string $filename
      * @return CSPBuilder
+     * @throws \Exception
      */
     public static function fromFile($filename = '')
     {
         if (!file_exists($filename)) {
             throw new \Exception($filename.' does not exist');
         }
-        $json = \file_get_contents($filename);
-        $array = \json_decode($json, true);
-        return new CSPBuilder($array);
+        return self::fromData(
+            \file_get_contents($filename)
+        );
     }
 
     /**
@@ -228,12 +230,13 @@ class CSPBuilder
      *
      * @param string $data
      * @return CSPBuilder
+     * @throws \Exception
      */
     public static function fromData($data = '')
     {
         $array = \json_decode($data, true);
 
-        if(!is_array($array)) {
+        if (!\is_array($array)) {
             throw new \Exception('Is not array valid');
         }
 
