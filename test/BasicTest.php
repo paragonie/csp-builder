@@ -82,6 +82,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /*
     public function testInjectCSPHeaderWithoutLegacy()
     {
         $modifiedMessage = $this->getMock(MessageInterface::class, ['withAddedHeader']);
@@ -129,4 +130,5 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
         self::assertSame($modifiedMessage3, $basic->injectCSPHeader($originalMessage, true));
     }
+    */
 }
