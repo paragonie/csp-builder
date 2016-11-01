@@ -5,17 +5,43 @@ namespace ParagonIE\CSPBuilder;
 use \ParagonIE\ConstantTime\Base64;
 use \Psr\Http\Message\MessageInterface;
 
+/**
+ * Class CSPBuilder
+ * @package ParagonIE\CSPBuilder
+ */
 class CSPBuilder
 {
     const FORMAT_APACHE = 'apache';
     const FORMAT_NGINX = 'nginx';
-    
+
+    /**
+     * @var array
+     */
     private $policies = [];
+
+    /**
+     * @var bool
+     */
     private $needsCompile = true;
+
+    /**
+     * @var string
+     */
     private $compiled = '';
+
+    /**
+     * @var bool
+     */
     private $reportOnly = false;
+
+    /**
+     * @var bool
+     */
     protected $supportOldBrowsers = true;
-    
+
+    /**
+     * @var string[]
+     */
     private static $directives = [
         'base-uri',
         'default-src',
@@ -72,7 +98,7 @@ class CSPBuilder
         }
         
         if (!empty($this->policies['report-uri'])) {
-            $compiled []= 'report-uri '.$this->policies['report-uri'].'; ';
+            $compiled []= 'report-uri ' . $this->policies['report-uri'] . '; ';
         }
         if (!empty($this->policies['upgrade-insecure-requests'])) {
             $compiled []= 'upgrade-insecure-requests';
@@ -84,7 +110,7 @@ class CSPBuilder
     }
     
     /**
-     * Add a source to our allow whitelist
+     * Add a source to our allow white-list
      * 
      * @param string $directive
      * @param string $path
@@ -292,7 +318,9 @@ class CSPBuilder
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
             $this->policies[$directive]['hashes'] []= [
-                $algorithm => \base64_encode(\hash($algorithm, $script, true))
+                $algorithm => Base64::encode(
+                    \hash($algorithm, $script, true)
+                )
             ];
         }
         return $this;
