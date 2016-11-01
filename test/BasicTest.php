@@ -7,7 +7,7 @@ use Psr\Http\Message\MessageInterface;
  */
 class BasicTest extends PHPUnit_Framework_TestCase
 {
-    public function testBasic()
+    public function testBasicFromFile()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
         $basic->addSource('img-src', 'ytimg.com');
@@ -43,6 +43,19 @@ class BasicTest extends PHPUnit_Framework_TestCase
             [
                 'Content-Security-Policy' => $noOld
             ]
+        );
+    }
+
+    public function testBasicFromData()
+    {
+        $data = file_get_contents(__DIR__.'/vectors/basic-csp.json');
+        
+        $basic = CSPBuilder::fromData($data);
+        $basic->addSource('img-src', 'ytimg.com');
+
+        $this->assertEquals(
+            file_get_contents(__DIR__.'/vectors/basic-csp.out'),
+            $basic->getCompiledHeader()
         );
     }
     

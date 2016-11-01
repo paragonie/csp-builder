@@ -22,6 +22,18 @@ $csp->sendCSPHeader();
 
 ```
 
+## Build a Content Security Policy header from a dynamic configuration
+
+```php
+<?php
+
+use \ParagonIE\CSPBuilder\CSPBuilder;
+
+$csp = CSPBuilder::fromData($configuration);
+$csp->sendCSPHeader();
+
+```
+
 ### Example
 
 ```json

@@ -226,6 +226,23 @@ class CSPBuilder
         $array = \json_decode($json, true);
         return new CSPBuilder($array);
     }
+
+    /**
+     * Factory method - create a new CSPBuilder object from a JSON data
+     *
+     * @param string $data
+     * @return CSPBuilder
+     */
+    public static function fromData($data = ''): self
+    {
+        $array = \json_decode($data, true);
+
+        if(!is_array($array)) {
+            throw new \Exception('Is not array valid');
+        }
+
+        return new CSPBuilder($array);
+    }
     
     /**
      * Get the formatted CSP header 
