@@ -40,6 +40,11 @@ class CSPBuilder
     protected $supportOldBrowsers = true;
 
     /**
+     * @var bool
+     */
+    protected $httpsTransformOnHttpsConnections = true;
+
+    /**
      * @var string[]
      */
     private static $directives = [
@@ -506,7 +511,7 @@ class CSPBuilder
                 if ($url !== false) {
                     if ($this->supportOldBrowsers) {
                         if (\strpos($url, '://') === false) {
-                            if ($this->isHTTPSConnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                            if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections) || !empty($this->policies['upgrade-insecure-requests'])) {
                                 // We only want HTTPS connections here.
                                 $ret .= 'https://'.$url.' ';
                             } else {
@@ -514,7 +519,7 @@ class CSPBuilder
                             }
                         }
                     }
-                    if ($this->isHTTPSConnection() || !empty($this->policies['upgrade-insecure-requests'])) {
+                    if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections) || !empty($this->policies['upgrade-insecure-requests'])) {
                         $ret .= \str_replace('http://', 'https://', $url).' ';
                     } else {
                         $ret .= $url.' ';
@@ -603,5 +608,33 @@ class CSPBuilder
             return $_SERVER['HTTPS'] !== 'off';
         }
         return false;
+    }
+
+    /**
+     * Disable that HTTP sources get converted to HTTPS if the connection is such.
+     *
+     * @return CSPBuilder|$this|static
+     */
+    public function disableHttpsTransformOnHttpsConnections(): self
+    {
+        $this->needsCompile = $this->httpsTransformOnHttpsConnections !== false;
+        $this->httpsTransformOnHttpsConnections = false;
+
+        return $this;
+    }
+
+    /**
+     * Enable that HTTP sources get converted to HTTPS if the connection is such.
+     *
+     * This is enabled by default
+     *
+     * @return CSPBuilder|$this|static
+     */
+    public function enableHttpsTransformOnHttpsConnections(): self
+    {
+        $this->needsCompile = $this->httpsTransformOnHttpsConnections !== true;
+        $this->httpsTransformOnHttpsConnections = true;
+
+        return $this;
     }
 }

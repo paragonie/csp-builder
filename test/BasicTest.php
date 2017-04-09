@@ -82,6 +82,55 @@ class BasicTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \ParagonIE\CSPBuilder\CSPBuilder
+     */
+    public function testSourceHttpsConversion()
+    {
+        /** @var CSPBuilder|\PHPUnit_Framework_MockObject_MockObject $cspHttp */
+        $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])->disableOriginalConstructor()->getMock();
+        $cspHttp->method('isHTTPSConnection')->willReturn(false);
+
+        $cspHttp->addSource('form', 'http://example.com');
+        $cspHttp->addSource('form', 'another.com');
+        $cspHttp->enableHttpsTransformOnHttpsConnections(); // enabled by default
+        $compiledCspHttp = $cspHttp->compile();
+        $this->assertContains('http://example.com', $compiledCspHttp);
+        $this->assertContains('http://another.com', $compiledCspHttp);
+
+        /** @var CSPBuilder|\PHPUnit_Framework_MockObject_MockObject $cspHttps */
+        $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])->disableOriginalConstructor()->getMock();
+        $cspHttps->method('isHTTPSConnection')->willReturn(true);
+
+        $cspHttps->addSource('form', 'http://example.com');
+        $cspHttps->addSource('form', 'another.com');
+
+        $compiledCspHttpsWithConvertEnabled = $cspHttps->compile();
+        $this->assertContains('https://example.com', $compiledCspHttpsWithConvertEnabled);
+        $this->assertContains('https://another.com', $compiledCspHttpsWithConvertEnabled);
+        $this->assertNotContains('http://example.com', $compiledCspHttpsWithConvertEnabled);
+        $this->assertNotContains('http://another.com', $compiledCspHttpsWithConvertEnabled);
+
+        $cspHttps->disableHttpsTransformOnHttpsConnections();
+        $compiledCspHttpsWithConvertDisabled = $cspHttps->compile();
+        $this->assertContains('http://example.com', $compiledCspHttpsWithConvertDisabled);
+        $this->assertContains('http://another.com', $compiledCspHttpsWithConvertDisabled);
+    }
+
+    /**
+     * @covers \ParagonIE\CSPBuilder\CSPBuilder
+     */
+    public function testUpgradeInsecureBeatsDisableHttpsConversionFlag()
+    {
+        $csp = new CSPBuilder();
+        $csp->addSource('form', 'http://example.com');
+        $csp->disableHttpsTransformOnHttpsConnections();
+        $csp->addDirective('upgrade-insecure-requests');
+        $compiled = $csp->compile();
+        $this->assertContains('https://example.com', $compiled);
+        $this->assertNotContains('http://example.com', $compiled);
+    }
+
     /*
     public function testInjectCSPHeaderWithoutLegacy()
     {
