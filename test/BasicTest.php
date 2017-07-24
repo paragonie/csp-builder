@@ -1,6 +1,5 @@
 <?php
 use ParagonIE\CSPBuilder\CSPBuilder;
-use Psr\Http\Message\MessageInterface;
 
 /**
  * 
@@ -155,53 +154,27 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $this->assertContains("'self'", $compiled);
     }
 
-    /*
-    public function testInjectCSPHeaderWithoutLegacy()
+    /**
+     * @covers CSPBuilder::setAllowUnsafeEval()
+     */
+    public function testAllowUnsafeEval()
     {
-        $modifiedMessage = $this->getMock(MessageInterface::class, ['withAddedHeader']);
-        $message         = $this->getMock(MessageInterface::class, ['withAddedHeader']);
-        $basic           = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
+        $csp = new CSPBuilder();
+        $csp->setAllowUnsafeEval('script-src', true);
+        $compiled = $csp->compile();
 
-        $header = $basic
-            ->disableOldBrowserSupport()
-            ->compile();
-        $message
-            ->expects(self::once())
-            ->method('withAddedHeader')
-            ->with('Content-Security-Policy', $header)
-            ->willReturn($modifiedMessage);
-
-        self::assertSame($modifiedMessage, $basic->injectCSPHeader($message));
+        $this->assertContains("'unsafe-eval'", $compiled);
     }
 
-    public function testInjectCSPHeaderWithLegacy()
+    /**
+     * @covers CSPBuilder::setAllowUnsafeInline()
+     */
+    public function testAllowUnsafeInline()
     {
-        $originalMessage  = $this->getMock(MessageInterface::class, ['withAddedHeader']);
-        $modifiedMessage1 = $this->getMock(MessageInterface::class, ['withAddedHeader']);
-        $modifiedMessage2 = $this->getMock(MessageInterface::class, ['withAddedHeader']);
-        $modifiedMessage3 = $this->getMock(MessageInterface::class, ['withAddedHeader']);
-        $basic            = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
+        $csp = new CSPBuilder();
+        $csp->setAllowUnsafeInline('script-src', true);
+        $compiled = $csp->compile();
 
-        $header = $basic
-            ->disableOldBrowserSupport()
-            ->compile();
-        $originalMessage
-            ->expects(self::once())
-            ->method('withAddedHeader')
-            ->with('Content-Security-Policy', $header)
-            ->willReturn($modifiedMessage1);
-        $modifiedMessage1
-            ->expects(self::once())
-            ->method('withAddedHeader')
-            ->with('X-Content-Security-Policy', $header)
-            ->willReturn($modifiedMessage2);
-        $modifiedMessage2
-            ->expects(self::once())
-            ->method('withAddedHeader')
-            ->with('X-Webkit-CSP', $header)
-            ->willReturn($modifiedMessage3);
-
-        self::assertSame($modifiedMessage3, $basic->injectCSPHeader($originalMessage, true));
+        $this->assertContains("'unsafe-inline'", $compiled);
     }
-    */
 }

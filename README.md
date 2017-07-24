@@ -124,7 +124,12 @@ $csp->addSource('image', 'https://ytimg.com')
 * `disableOldBrowserSupport()`
 * `enableOldBrowserSupport()`
 * `hash()`
+* `preHash()`
 * `setDirective()`
+* `setDataAllowed()`
+* `setSelfAllowed()`
+* `setAllowUnsafeEval()`
+* `setAllowUnsafeInline()`
 
 ## Inject a CSP header into a PSR-7 message
 
