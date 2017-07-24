@@ -447,9 +447,9 @@ class CSPBuilder
     /**
      * Send the compiled CSP as a header()
      *
-     * @param boolean $legacy Send legacy headers?
+     * @param bool $legacy Send legacy headers?
      *
-     * @return boolean
+     * @return bool
      * @throws \Exception
      */
     public function sendCSPHeader(bool $legacy = true): bool

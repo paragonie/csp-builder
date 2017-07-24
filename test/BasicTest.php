@@ -118,7 +118,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \ParagonIE\CSPBuilder\CSPBuilder
+     * @covers CSPBuilder::disableHttpsTransformOnHttpsConnections()
      */
     public function testUpgradeInsecureBeatsDisableHttpsConversionFlag()
     {
@@ -129,6 +129,30 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $compiled = $csp->compile();
         $this->assertContains('https://example.com', $compiled);
         $this->assertNotContains('http://example.com', $compiled);
+    }
+
+    /**
+     * @covers CSPBuilder::setDataAllowed()
+     */
+    public function testAllowDataUris()
+    {
+        $csp = new CSPBuilder();
+        $csp->setDataAllowed('img-src', true);
+        $compiled = $csp->compile();
+
+        $this->assertContains("data:", $compiled);
+    }
+
+    /**
+     * @covers CSPBuilder::setSelfAllowed()
+     */
+    public function testAllowSelfUris()
+    {
+        $csp = new CSPBuilder();
+        $csp->setSelfAllowed('img-src', true);
+        $compiled = $csp->compile();
+
+        $this->assertContains("'self'", $compiled);
     }
 
     /*
