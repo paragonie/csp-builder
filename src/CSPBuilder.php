@@ -60,6 +60,7 @@ class CSPBuilder
         'media-src',
         'object-src',
         'plugin-types',
+        'manifest-src',
         'script-src',
         'style-src'
     ];
