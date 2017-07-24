@@ -64,7 +64,7 @@ class CSPBuilder
         'script-src',
         'style-src'
     ];
-    
+
     /**
      * @param array $policy
      */
@@ -72,10 +72,10 @@ class CSPBuilder
     {
         $this->policies = $policy;
     }
-    
+
     /**
      * Compile the current policies into a CSP header
-     * 
+     *
      * @return string
      */
     public function compile(): string
@@ -86,9 +86,9 @@ class CSPBuilder
         } else {
             $this->reportOnly = false;
         }
-        
+
         $compiled = [];
-        
+
         foreach(self::$directives as $dir) {
             if (\in_array($dir, $ruleKeys)) {
                 if (empty($ruleKeys)) {
@@ -102,26 +102,26 @@ class CSPBuilder
                 );
             }
         }
-        
+
         if (!empty($this->policies['report-uri'])) {
             $compiled []= 'report-uri ' . $this->policies['report-uri'] . '; ';
         }
         if (!empty($this->policies['upgrade-insecure-requests'])) {
             $compiled []= 'upgrade-insecure-requests';
         }
-        
+
         $this->compiled = \implode('', $compiled);
         $this->needsCompile = false;
         return $this->compiled;
     }
-    
+
     /**
      * Add a source to our allow white-list
-     * 
+     *
      * @param string $directive
      * @param string $path
-     * 
-     * @return CSPBuilder
+     *
+     * @return self
      */
     public function addSource(string $directive, string $path): self
     {
@@ -179,16 +179,16 @@ class CSPBuilder
         $this->policies[$directive]['allow'][] = $path;
         return $this;
     }
-    
+
     /**
      * Add a directive if it doesn't already exist
-     * 
+     *
      * If it already exists, do nothing
-     * 
+     *
      * @param string $key
      * @param mixed $value
-     * 
-     * @return CSPBuilder
+     *
+     * @return self
      */
     public function addDirective(string $key, $value = null): self
     {
@@ -201,25 +201,25 @@ class CSPBuilder
         }
         return $this;
     }
-    
+
     /**
      * Add a plugin type to be added
-     * 
+     *
      * @param string $mime
-     * @return CSPBuilder
+     * @return self
      */
     public function allowPluginType(string $mime = 'text/plain'): self
     {
         $this->policies['plugin-types']['types'] []= $mime;
-        
+
         $this->needsCompile = true;
         return $this;
     }
-    
+
     /**
      * Disable old browser support (e.g. Safari)
-     * 
-     * @return CSPBuilder
+     *
+     * @return self
      */
     public function disableOldBrowserSupport(): self
     {
@@ -227,13 +227,13 @@ class CSPBuilder
         $this->supportOldBrowsers = false;
         return $this;
     }
-    
+
     /**
      * Enable old browser support (e.g. Safari)
-     * 
+     *
      * This is enabled by default
-     * 
-     * @return CSPBuilder
+     *
+     * @return self
      */
     public function enableOldBrowserSupport(): self
     {
@@ -246,7 +246,7 @@ class CSPBuilder
      * Factory method - create a new CSPBuilder object from a JSON file
      *
      * @param string $filename
-     * @return CSPBuilder
+     * @return self
      * @throws \Exception
      */
     public static function fromFile(string $filename = ''): self
@@ -254,16 +254,18 @@ class CSPBuilder
         if (!\file_exists($filename)) {
             throw new \Exception($filename.' does not exist');
         }
-        return self::fromData(
-            \file_get_contents($filename)
-        );
+        $contents = \file_get_contents($filename);
+        if (!\is_string($contents)) {
+            throw new \Exception('Could not read file contents');
+        }
+        return self::fromData($contents);
     }
 
     /**
      * Factory method - create a new CSPBuilder object from a JSON data
      *
      * @param string $data
-     * @return CSPBuilder
+     * @return self
      * @throws \Exception
      */
     public static function fromData($data = ''): self
@@ -276,10 +278,10 @@ class CSPBuilder
 
         return new CSPBuilder($array);
     }
-    
+
     /**
-     * Get the formatted CSP header 
-     * 
+     * Get the formatted CSP header
+     *
      * @return string
      */
     public function getCompiledHeader(): string
@@ -289,12 +291,12 @@ class CSPBuilder
         }
         return $this->compiled;
     }
-    
+
     /**
      * Get an associative array of headers to return.
-     * 
+     *
      * @param bool $legacy
-     * @return string[]
+     * @return array<string, string>
      */
     public function getHeaderArray(bool $legacy = true): array
     {
@@ -303,18 +305,18 @@ class CSPBuilder
         }
         $return = [];
         foreach ($this->getHeaderKeys($legacy) as $key) {
-            $return[$key] = $this->compiled;
+            $return[(string) $key] = $this->compiled;
         }
         return $return;
     }
-    
+
     /**
      * Add a new hash to the existing CSP
-     * 
+     *
      * @param string $directive
      * @param string $script
      * @param string $algorithm
-     * @return CSPBuilder
+     * @return self
      */
     public function hash(
         string $directive = 'script-src',
@@ -331,14 +333,14 @@ class CSPBuilder
         }
         return $this;
     }
-    
+
     /**
      * Add a new (pre-calculated) base64-encoded hash to the existing CSP
-     * 
+     *
      * @param string $directive
      * @param string $hash
      * @param string $algorithm
-     * @return CSPBuilder
+     * @return self
      */
     public function preHash(
         string $directive = 'script-src',
@@ -353,10 +355,10 @@ class CSPBuilder
         }
         return $this;
     }
-    
+
     /**
      * PSR-7 header injection
-     * 
+     *
      * @param \Psr\Http\Message\MessageInterface $message
      * @param bool $legacy
      * @return \Psr\Http\Message\MessageInterface
@@ -377,7 +379,7 @@ class CSPBuilder
      *
      * @param string $directive
      * @param string $nonce (if empty, it will be generated)
-     * @return null|string
+     * @return string
      */
     public function nonce(string $directive = 'script-src', string $nonce = ''): string
     {
@@ -408,12 +410,12 @@ class CSPBuilder
         if ($this->needsCompile) {
             $this->compile();
         }
-        
+
         // Are we doing a report-only header?
-        $which = $this->reportOnly 
+        $which = $this->reportOnly
             ? 'Content-Security-Policy-Report-Only'
             : 'Content-Security-Policy';
-        
+
         switch ($format) {
             case self::FORMAT_NGINX:
                 // In PHP < 7, implode() is faster than concatenation
@@ -421,7 +423,7 @@ class CSPBuilder
                     'add_header ',
                     $which,
                     ' "',
-                        \rtrim($this->compiled, ' '),
+                    \rtrim($this->compiled, ' '),
                     '";',
                     "\n"
                 ]);
@@ -431,7 +433,7 @@ class CSPBuilder
                     'Header add ',
                     $which,
                     ' "',
-                        \rtrim($this->compiled, ' '),
+                    \rtrim($this->compiled, ' '),
                     '"',
                     "\n"
                 ]);
@@ -441,12 +443,12 @@ class CSPBuilder
         }
         return \file_put_contents($outputFile, $output) !== false;
     }
-    
+
     /**
      * Send the compiled CSP as a header()
-     * 
+     *
      * @param boolean $legacy Send legacy headers?
-     * 
+     *
      * @return boolean
      * @throws \Exception
      */
@@ -463,30 +465,96 @@ class CSPBuilder
         }
         return true;
     }
-    
+
+    /**
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setDataAllowed(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['data'] = $allow;
+        return $this;
+    }
+
+    /**
+     * Allow self URIs for a given directive
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setSelfAllowed(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['self'] = $allow;
+        return $this;
+    }
+
+    /**
+     * Allow unsafe-eval
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setAllowUnsafeEval(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-eval'] = $allow;
+        return $this;
+    }
+
+    /**
+     * Allow unsafe-inline
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setAllowUnsafeInline(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-inline'] = $allow;
+        return $this;
+    }
+
     /**
      * Set a directive
-     * 
+     *
      * @param string $key
      * @param mixed $value
-     * 
-     * @return CSPBuilder
+     *
+     * @return self
      */
-    public function setDirective(string $key, $value = null): self
+    public function setDirective(string $key, $value = []): self
     {
         $this->policies[$key] = $value;
         return $this;
     }
-    
+
     /**
      * Compile a subgroup into a policy string
-     * 
+     *
      * @param string $directive
      * @param mixed $policies
-     * 
+     *
      * @return string
      */
-    protected function compileSubgroup(string $directive, $policies = null): string
+    protected function compileSubgroup(string $directive, $policies = []): string
     {
         if ($policies === '*') {
             // Don't even waste the overhead adding this to the header
@@ -505,7 +573,7 @@ class CSPBuilder
         if (!empty($policies['self'])) {
             $ret .= "'self' ";
         }
-        
+
         if (!empty($policies['allow'])) {
             foreach ($policies['allow'] as $url) {
                 $url = \filter_var($url, FILTER_SANITIZE_URL);
@@ -528,7 +596,7 @@ class CSPBuilder
                 }
             }
         }
-        
+
         if (!empty($policies['hashes'])) {
             foreach ($policies['hashes'] as $hash) {
                 foreach ($hash as $algo => $hashval) {
@@ -542,7 +610,7 @@ class CSPBuilder
                 }
             }
         }
-        
+
         if (!empty($policies['nonces'])) {
             foreach ($policies['nonces'] as $nonce) {
                 $ret .= \implode('', [
@@ -552,13 +620,13 @@ class CSPBuilder
                 ]);
             }
         }
-        
+
         if (!empty($policies['types'])) {
             foreach ($policies['types'] as $type) {
                 $ret .= $type.' ';
             }
         }
-        
+
         if (!empty($policies['unsafe-inline'])) {
             $ret .= "'unsafe-inline' ";
         }
@@ -570,10 +638,10 @@ class CSPBuilder
         }
         return \rtrim($ret, ' ').'; ';
     }
-    
+
     /**
      * Get an array of header keys to return
-     * 
+     *
      * @param bool $legacy
      * @return array
      */
@@ -581,26 +649,26 @@ class CSPBuilder
     {
         // We always want this
         $return = [
-            $this->reportOnly 
+            $this->reportOnly
                 ? 'Content-Security-Policy-Report-Only'
                 : 'Content-Security-Policy'
         ];
-        
+
         // If we're supporting legacy devices, include these too:
         if ($legacy) {
-            $return []= $this->reportOnly 
+            $return []= $this->reportOnly
                 ? 'X-Content-Security-Policy-Report-Only'
                 : 'X-Content-Security-Policy';
-            $return []= $this->reportOnly 
+            $return []= $this->reportOnly
                 ? 'X-Webkit-CSP-Report-Only'
                 : 'X-Webkit-CSP';
         }
         return $return;
     }
-    
+
     /**
      * Is this user currently connected over HTTPS?
-     * 
+     *
      * @return bool
      */
     protected function isHTTPSConnection(): bool
@@ -614,7 +682,7 @@ class CSPBuilder
     /**
      * Disable that HTTP sources get converted to HTTPS if the connection is such.
      *
-     * @return CSPBuilder|$this|static
+     * @return self|$this|static
      */
     public function disableHttpsTransformOnHttpsConnections(): self
     {
@@ -629,7 +697,7 @@ class CSPBuilder
      *
      * This is enabled by default
      *
-     * @return CSPBuilder|$this|static
+     * @return self|$this|static
      */
     public function enableHttpsTransformOnHttpsConnections(): self
     {
