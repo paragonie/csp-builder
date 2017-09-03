@@ -12,3 +12,7 @@ matrix:
 install:
     - composer self-update
     - composer update
+
+script:
+    - vendor/bin/phpunit
+    - vendor/bin/psalm
