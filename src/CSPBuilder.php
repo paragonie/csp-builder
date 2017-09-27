@@ -682,7 +682,7 @@ class CSPBuilder
     /**
      * Disable that HTTP sources get converted to HTTPS if the connection is such.
      *
-     * @return self|$this|static
+     * @return self
      */
     public function disableHttpsTransformOnHttpsConnections(): self
     {
@@ -697,7 +697,7 @@ class CSPBuilder
      *
      * This is enabled by default
      *
-     * @return self|$this|static
+     * @return self
      */
     public function enableHttpsTransformOnHttpsConnections(): self
     {
