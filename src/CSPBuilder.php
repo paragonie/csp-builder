@@ -104,6 +104,9 @@ class CSPBuilder
         }
 
         if (!empty($this->policies['report-uri'])) {
+            if (!\is_string($this->policies['report-uri'])) {
+                throw new \TypeError('report-uri policy somehow not a string');
+            }
             $compiled []= 'report-uri ' . $this->policies['report-uri'] . '; ';
         }
         if (!empty($this->policies['upgrade-insecure-requests'])) {
@@ -543,6 +546,16 @@ class CSPBuilder
     public function setDirective(string $key, $value = []): self
     {
         $this->policies[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * @param string $url
+     * @return CSPBuilder
+     */
+    public function setReportUri(string $url = ''): self
+    {
+        $this->policies['report-uri'] = $url;
         return $this;
     }
 

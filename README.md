@@ -103,6 +103,9 @@ $hash = $csp->hash('script-src', $someScript, 'sha256');
 // Add a new source domain to the whitelist
 $csp->addSource('image', 'https://ytimg.com');
 
+// Set the Report URI
+$csp->setReportUri('https://example.com/csp_report.php');
+
 // Let's turn on HTTPS enforcement
 $csp->addDirective('upgrade-insecure-requests', true);
 
