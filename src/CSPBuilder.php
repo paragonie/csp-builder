@@ -554,7 +554,7 @@ class CSPBuilder
 
     /**
      * @param string $url
-     * @return CSPBuilder
+     * @return self
      */
     public function setReportUri(string $url = ''): self
     {
