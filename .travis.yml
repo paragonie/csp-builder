@@ -8,8 +8,6 @@ php:
 
 matrix:
     fast_finish: true
-    allow_failures:
-        - php: "hhvm"
 
 install:
     - composer self-update
