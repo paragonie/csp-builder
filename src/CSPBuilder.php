@@ -107,7 +107,10 @@ class CSPBuilder
             if (!\is_string($this->policies['report-uri'])) {
                 throw new \TypeError('report-uri policy somehow not a string');
             }
-            $compiled []= 'report-uri ' . $this->policies['report-uri'] . '; ';
+            if ($this->supportOldBrowsers) {
+                $compiled [] = 'report-uri ' . $this->policies['report-uri'] . '; ';
+            }
+            $compiled []= 'report-to ' . $this->policies['report-uri'] . '; ';
         }
         if (!empty($this->policies['upgrade-insecure-requests'])) {
             $compiled []= 'upgrade-insecure-requests';
@@ -648,6 +651,12 @@ class CSPBuilder
         }
         if (!empty($policies['data'])) {
             $ret .= "data: ";
+        }
+        if (!empty($policies['strict-dynamic'])) {
+            $ret .= "'strict-dynamic' ";
+        }
+        if (!empty($policies['unsafe-hashed-attributes'])) {
+            $ret .= "'unsafe-hashed-attributes' ";
         }
         return \rtrim($ret, ' ').'; ';
     }
