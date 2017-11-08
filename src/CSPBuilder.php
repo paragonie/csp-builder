@@ -89,7 +89,7 @@ class CSPBuilder
 
         $compiled = [];
 
-        foreach(self::$directives as $dir) {
+        foreach (self::$directives as $dir) {
             if (\in_array($dir, $ruleKeys)) {
                 if (empty($ruleKeys)) {
                     if ($dir === 'base-uri') {
@@ -278,7 +278,7 @@ class CSPBuilder
     {
         $array = \json_decode($data, true);
 
-        if(!\is_array($array)) {
+        if (!\is_array($array)) {
             throw new \Exception('Is not array valid');
         }
 
@@ -369,7 +369,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return \Psr\Http\Message\MessageInterface
      */
-    function injectCSPHeader(MessageInterface $message, bool $legacy = false): MessageInterface
+    public function injectCSPHeader(MessageInterface $message, bool $legacy = false): MessageInterface
     {
         if ($this->needsCompile) {
             $this->compile();
@@ -596,7 +596,8 @@ class CSPBuilder
                 if ($url !== false) {
                     if ($this->supportOldBrowsers) {
                         if (\strpos($url, '://') === false) {
-                            if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections) || !empty($this->policies['upgrade-insecure-requests'])) {
+                            if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections)
+                                || !empty($this->policies['upgrade-insecure-requests'])) {
                                 // We only want HTTPS connections here.
                                 $ret .= 'https://'.$url.' ';
                             } else {
@@ -604,7 +605,8 @@ class CSPBuilder
                             }
                         }
                     }
-                    if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections) || !empty($this->policies['upgrade-insecure-requests'])) {
+                    if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections)
+                        || !empty($this->policies['upgrade-insecure-requests'])) {
                         $ret .= \str_replace('http://', 'https://', $url).' ';
                     } else {
                         $ret .= $url.' ';

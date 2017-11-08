@@ -1,9 +1,10 @@
 <?php
-use ParagonIE\CSPBuilder\CSPBuilder;
 
-/**
- * 
- */
+namespace ParagonIE\CSPBuilderTest;
+
+use ParagonIE\CSPBuilder\CSPBuilder;
+use PHPUnit_Framework_TestCase;
+
 class BasicTest extends PHPUnit_Framework_TestCase
 {
     public function testBasicFromFile()
@@ -14,7 +15,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
             file_get_contents(__DIR__.'/vectors/basic-csp.out'),
             $basic->getCompiledHeader()
         );
-        
+
         $noOld = file_get_contents(__DIR__.'/vectors/basic-csp-no-old.out');
         // We expect different output for ytimg.com when we disable legacy
         // browser support (i.e. Safari):
@@ -24,7 +25,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
                 ->disableOldBrowserSupport()
                 ->getCompiledHeader()
         );
-        
+
         $array = $basic->getHeaderArray();
         $this->assertEquals(
             $array,
@@ -34,8 +35,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
                 'X-Webkit-CSP' => $noOld
             ]
         );
-        
-        
+
+
         $array2 = $basic->getHeaderArray(false);
         $this->assertEquals(
             $array2,
@@ -48,7 +49,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
     public function testBasicFromData()
     {
         $data = file_get_contents(__DIR__.'/vectors/basic-csp.json');
-        
+
         $basic = CSPBuilder::fromData($data);
         $basic->addSource('img-src', 'ytimg.com');
 
@@ -57,7 +58,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
             $basic->getCompiledHeader()
         );
     }
-    
+
     public function testHash()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
@@ -67,7 +68,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
             $basic->getCompiledHeader()
         );
     }
-    
+
     public function testPreHash()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
@@ -87,7 +88,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
     public function testSourceHttpsConversion()
     {
         /** @var CSPBuilder|\PHPUnit_Framework_MockObject_MockObject $cspHttp */
-        $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])->disableOriginalConstructor()->getMock();
+        $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+            ->disableOriginalConstructor()->getMock();
         $cspHttp->method('isHTTPSConnection')->willReturn(false);
 
         $cspHttp->addSource('form', 'http://example.com');
@@ -98,7 +100,8 @@ class BasicTest extends PHPUnit_Framework_TestCase
         $this->assertContains('http://another.com', $compiledCspHttp);
 
         /** @var CSPBuilder|\PHPUnit_Framework_MockObject_MockObject $cspHttps */
-        $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])->disableOriginalConstructor()->getMock();
+        $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+            ->disableOriginalConstructor()->getMock();
         $cspHttps->method('isHTTPSConnection')->willReturn(true);
 
         $cspHttps->addSource('form', 'http://example.com');
