@@ -303,7 +303,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return array<string, string>
      */
-    public function getHeaderArray(bool $legacy = true)
+    public function getHeaderArray($legacy = true)
     {
         if ($this->needsCompile) {
             $this->compile();
@@ -368,7 +368,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return \Psr\Http\Message\MessageInterface
      */
-    public function injectCSPHeader(MessageInterface $message, bool $legacy = false): MessageInterface
+    public function injectCSPHeader(MessageInterface $message, $legacy = false): MessageInterface
     {
         if ($this->needsCompile) {
             $this->compile();
@@ -411,7 +411,7 @@ class CSPBuilder
     public function saveSnippet(
         string $outputFile,
         string $format = self::FORMAT_NGINX
-    ): bool {
+    ) {
         if ($this->needsCompile) {
             $this->compile();
         }
@@ -457,7 +457,7 @@ class CSPBuilder
      * @return bool
      * @throws \Exception
      */
-    public function sendCSPHeader(bool $legacy = true): bool
+    public function sendCSPHeader($legacy = true)
     {
         if (\headers_sent()) {
             throw new \Exception('Headers already sent!');
@@ -477,7 +477,7 @@ class CSPBuilder
      * @return self
      * @throws \Exception
      */
-    public function setDataAllowed($directive = '', bool $allow = false)
+    public function setDataAllowed($directive = '', $allow = false)
     {
         if (!\in_array($directive, self::$directives)) {
             throw new \Exception('Directive ' . $directive . ' does not exist');
@@ -494,7 +494,7 @@ class CSPBuilder
      * @return self
      * @throws \Exception
      */
-    public function setSelfAllowed($directive = '', bool $allow = false)
+    public function setSelfAllowed($directive = '', $allow = false)
     {
         if (!\in_array($directive, self::$directives)) {
             throw new \Exception('Directive ' . $directive . ' does not exist');
@@ -511,7 +511,7 @@ class CSPBuilder
      * @return self
      * @throws \Exception
      */
-    public function setAllowUnsafeEval($directive = '', bool $allow = false)
+    public function setAllowUnsafeEval($directive = '', $allow = false)
     {
         if (!\in_array($directive, self::$directives)) {
             throw new \Exception('Directive ' . $directive . ' does not exist');
@@ -528,7 +528,7 @@ class CSPBuilder
      * @return self
      * @throws \Exception
      */
-    public function setAllowUnsafeInline($directive = '', bool $allow = false)
+    public function setAllowUnsafeInline($directive = '', $allow = false)
     {
         if (!\in_array($directive, self::$directives)) {
             throw new \Exception('Directive ' . $directive . ' does not exist');
@@ -668,7 +668,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return array
      */
-    protected function getHeaderKeys(bool $legacy = true)
+    protected function getHeaderKeys($legacy = true)
     {
         // We always want this
         $return = [
@@ -694,7 +694,7 @@ class CSPBuilder
      *
      * @return bool
      */
-    protected function isHTTPSConnection(): bool
+    protected function isHTTPSConnection()
     {
         if (!empty($_SERVER['HTTPS'])) {
             return $_SERVER['HTTPS'] !== 'off';

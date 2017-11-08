@@ -2,6 +2,8 @@ language: php
 sudo: false
 
 php:
+    - "7.2"
+    - "7.1"
     - "7.0"
     - "5.6"
     - "5.5"
@@ -15,3 +17,8 @@ matrix:
 install:
     - composer self-update
     - composer update
+
+script:
+    - vendor/bin/phpunit
+    - vendor/bin/psalm
+    - vendor/bin/phpcs
