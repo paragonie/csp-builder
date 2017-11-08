@@ -324,9 +324,9 @@ class CSPBuilder
      * @return self
      */
     public function hash(
-        string $directive = 'script-src',
-        string $script = '',
-        string $algorithm = 'sha384'
+        $directive = 'script-src',
+        $script = '',
+        $algorithm = 'sha384'
     ) {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
@@ -348,9 +348,9 @@ class CSPBuilder
      * @return self
      */
     public function preHash(
-        string $directive = 'script-src',
-        string $hash = '',
-        string $algorithm = 'sha384'
+        $directive = 'script-src',
+        $hash = '',
+        $algorithm = 'sha384'
     ) {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
@@ -409,8 +409,8 @@ class CSPBuilder
      * @throws \Exception
      */
     public function saveSnippet(
-        string $outputFile,
-        string $format = self::FORMAT_NGINX
+        $outputFile,
+        $format = self::FORMAT_NGINX
     ) {
         if ($this->needsCompile) {
             $this->compile();
