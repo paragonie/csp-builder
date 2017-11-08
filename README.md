@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/paragonie/csp-builder.svg?branch=v1.x)](https://travis-ci.org/paragonie/csp-builder)
 
+You are on the **Version 1.x** branch, which supports PHP 5.5 and newer.
+However, Version 2.x is recommended for projects that run PHP 7+. 
+
 Easily integrate Content-Security-Policy headers into your web application, either
 from a JSON configuration file, or programatically.
 
