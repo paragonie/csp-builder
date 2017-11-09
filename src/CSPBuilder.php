@@ -368,7 +368,7 @@ class CSPBuilder
      * @param bool $legacy
      * @return \Psr\Http\Message\MessageInterface
      */
-    public function injectCSPHeader(MessageInterface $message, $legacy = false): MessageInterface
+    public function injectCSPHeader(MessageInterface $message, $legacy = false)
     {
         if ($this->needsCompile) {
             $this->compile();
