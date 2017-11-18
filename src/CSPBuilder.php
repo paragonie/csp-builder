@@ -430,7 +430,7 @@ class CSPBuilder
                     $which,
                     ' "',
                     \rtrim($this->compiled, ' '),
-                    '";',
+                    '" always;',
                     "\n"
                 ]);
                 break;
