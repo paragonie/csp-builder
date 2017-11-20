@@ -354,28 +354,6 @@ class CSPBuilder
     }
 
     /**
-     * Add a new (pre-calculated) base64-encoded hash to the existing CSP
-     *
-     * @param string $directive
-     * @param string $hash
-     * @param string $algorithm
-     * @return self
-     */
-    public function preHash(
-        string $directive = 'script-src',
-        string $hash = '',
-        string $algorithm = 'sha384'
-    ): self {
-        $ruleKeys = \array_keys($this->policies);
-        if (\in_array($directive, $ruleKeys)) {
-            $this->policies[$directive]['hashes'] []= [
-                $algorithm => $hash
-            ];
-        }
-        return $this;
-    }
-
-    /**
      * PSR-7 header injection.
      *
      * This will inject the header into your PSR-7 object. (Request, Response,
@@ -416,6 +394,28 @@ class CSPBuilder
         }
         $this->policies[$directive]['nonces'] []= $nonce;
         return $nonce;
+    }
+
+    /**
+     * Add a new (pre-calculated) base64-encoded hash to the existing CSP
+     *
+     * @param string $directive
+     * @param string $hash
+     * @param string $algorithm
+     * @return self
+     */
+    public function preHash(
+        string $directive = 'script-src',
+        string $hash = '',
+        string $algorithm = 'sha384'
+    ): self {
+        $ruleKeys = \array_keys($this->policies);
+        if (\in_array($directive, $ruleKeys)) {
+            $this->policies[$directive]['hashes'] []= [
+                $algorithm => $hash
+            ];
+        }
+        return $this;
     }
 
     /**
@@ -490,6 +490,40 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow unsafe-eval within a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setAllowUnsafeEval(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-eval'] = $allow;
+        return $this;
+    }
+
+    /**
+     * Allow/disallow unsafe-inline within a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setAllowUnsafeInline(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-inline'] = $allow;
+        return $this;
+    }
+
+    /**
      * Allow/disallow blob: URIs for a given directive
      *
      * @param string $directive
@@ -520,6 +554,23 @@ class CSPBuilder
             throw new \Exception('Directive ' . $directive . ' does not exist');
         }
         $this->policies[$directive]['data'] = $allow;
+        return $this;
+    }
+
+    /**
+     * Set a directive.
+     *
+     * This lets you overwrite a complex directive entirely (e.g. script-src)
+     * or set a top-level directive (e.g. report-uri).
+     *
+     * @param string $key
+     * @param mixed $value
+     *
+     * @return self
+     */
+    public function setDirective(string $key, $value = []): self
+    {
+        $this->policies[$key] = $value;
         return $this;
     }
 
@@ -571,57 +622,6 @@ class CSPBuilder
             throw new \Exception('Directive ' . $directive . ' does not exist');
         }
         $this->policies[$directive]['self'] = $allow;
-        return $this;
-    }
-
-    /**
-     * Allow/disallow unsafe-eval within a given directive.
-     *
-     * @param string $directive
-     * @param bool $allow
-     * @return self
-     * @throws \Exception
-     */
-    public function setAllowUnsafeEval(string $directive = '', bool $allow = false): self
-    {
-        if (!\in_array($directive, self::$directives)) {
-            throw new \Exception('Directive ' . $directive . ' does not exist');
-        }
-        $this->policies[$directive]['unsafe-eval'] = $allow;
-        return $this;
-    }
-
-    /**
-     * Allow/disallow unsafe-inline within a given directive.
-     *
-     * @param string $directive
-     * @param bool $allow
-     * @return self
-     * @throws \Exception
-     */
-    public function setAllowUnsafeInline(string $directive = '', bool $allow = false): self
-    {
-        if (!\in_array($directive, self::$directives)) {
-            throw new \Exception('Directive ' . $directive . ' does not exist');
-        }
-        $this->policies[$directive]['unsafe-inline'] = $allow;
-        return $this;
-    }
-
-    /**
-     * Set a directive.
-     *
-     * This lets you overwrite a complex directive entirely (e.g. script-src)
-     * or set a top-level directive (e.g. report-uri).
-     *
-     * @param string $key
-     * @param mixed $value
-     *
-     * @return self
-     */
-    public function setDirective(string $key, $value = []): self
-    {
-        $this->policies[$key] = $value;
         return $this;
     }
 
