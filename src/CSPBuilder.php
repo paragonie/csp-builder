@@ -626,6 +626,30 @@ class CSPBuilder
     }
 
     /**
+     * @see CSPBuilder::setAllowUnsafeEval()
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     */
+    public function setUnsafeEvalAllowed(string $directive = '', bool $allow = false): self
+    {
+        return $this->setAllowUnsafeEval($directive, $allow);
+    }
+
+    /**
+     * @see CSPBuilder::setAllowUnsafeInline()
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     */
+    public function setUnsafeInlineAllowed(string $directive = '', bool $allow = false): self
+    {
+        return $this->setAllowUnsafeEval($directive, $allow);
+    }
+
+    /**
      * Set the Report URI to the desired string. This also sets the 'report-to'
      * component of the CSP header for CSP Level 3 compatibility.
      *
