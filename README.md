@@ -10,6 +10,8 @@ as part of our effort to encourage better [application security](https://paragon
 
 Check out our other [open source projects](https://paragonie.com/projects) too.
 
+There's also a [CSP middleware](https://github.com/geggleto/geggleto-csp-middleware) available that uses this library.
+
 ## Build a Content Security Policy header from a JSON configuration file
 
 ```php
