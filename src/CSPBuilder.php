@@ -478,12 +478,57 @@ class CSPBuilder
      * @return self
      * @throws \Exception
      */
+    public function setBlobAllowed(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['blob'] = $allow;
+        return $this;
+    }
+
+    /**
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
     public function setDataAllowed(string $directive = '', bool $allow = false): self
     {
         if (!\in_array($directive, self::$directives)) {
             throw new \Exception('Directive ' . $directive . ' does not exist');
         }
         $this->policies[$directive]['data'] = $allow;
+        return $this;
+    }
+
+    /**
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setFileSystemAllowed(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['filesystem'] = $allow;
+        return $this;
+    }
+
+    /**
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setMediaStreamAllowed(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['mediastream'] = $allow;
         return $this;
     }
 
@@ -651,8 +696,17 @@ class CSPBuilder
         if (!empty($policies['unsafe-eval'])) {
             $ret .= "'unsafe-eval' ";
         }
+        if (!empty($policies['blob'])) {
+            $ret .= "blob: ";
+        }
         if (!empty($policies['data'])) {
             $ret .= "data: ";
+        }
+        if (!empty($policies['mediastream'])) {
+            $ret .= "mediastream: ";
+        }
+        if (!empty($policies['filesystem'])) {
+            $ret .= "filesystem: ";
         }
         if (!empty($policies['strict-dynamic'])) {
             $ret .= "'strict-dynamic' ";
