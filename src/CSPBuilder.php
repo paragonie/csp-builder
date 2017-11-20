@@ -77,6 +77,7 @@ class CSPBuilder
      * Compile the current policies into a CSP header
      *
      * @return string
+     * @throws \TypeError
      */
     public function compile(): string
     {
@@ -249,22 +250,15 @@ class CSPBuilder
     }
 
     /**
-     * Factory method - create a new CSPBuilder object from a JSON file
+     * This just passes the array to the constructor, but hopefully will save
+     * someone in a hurry from a moment of frustration.
      *
-     * @param string $filename
+     * @param array $array
      * @return self
-     * @throws \Exception
      */
-    public static function fromFile(string $filename = ''): self
+    public static function fromArray(array $array = []): self
     {
-        if (!\file_exists($filename)) {
-            throw new \Exception($filename.' does not exist');
-        }
-        $contents = \file_get_contents($filename);
-        if (!\is_string($contents)) {
-            throw new \Exception('Could not read file contents');
-        }
-        return self::fromData($contents);
+        return new CSPBuilder($array);
     }
 
     /**
@@ -283,6 +277,25 @@ class CSPBuilder
         }
 
         return new CSPBuilder($array);
+    }
+
+    /**
+     * Factory method - create a new CSPBuilder object from a JSON file
+     *
+     * @param string $filename
+     * @return self
+     * @throws \Exception
+     */
+    public static function fromFile(string $filename = ''): self
+    {
+        if (!\file_exists($filename)) {
+            throw new \Exception($filename.' does not exist');
+        }
+        $contents = \file_get_contents($filename);
+        if (!\is_string($contents)) {
+            throw new \Exception('Could not read file contents');
+        }
+        return self::fromData($contents);
     }
 
     /**
@@ -363,7 +376,11 @@ class CSPBuilder
     }
 
     /**
-     * PSR-7 header injection
+     * PSR-7 header injection.
+     *
+     * This will inject the header into your PSR-7 object. (Request, Response,
+     * etc.) This method returns an instance of whatever you passed, so long
+     * as it implements MessageInterface.
      *
      * @param \Psr\Http\Message\MessageInterface $message
      * @param bool $legacy
@@ -381,7 +398,7 @@ class CSPBuilder
     }
 
     /**
-     * Add a new nonce to the existing CSP
+     * Add a new nonce to the existing CSP. Returns the nonce generated.
      *
      * @param string $directive
      * @param string $nonce (if empty, it will be generated)
@@ -473,6 +490,8 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow blob: URIs for a given directive
+     *
      * @param string $directive
      * @param bool $allow
      * @return self
@@ -488,6 +507,8 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow data: URIs for a given directive
+     *
      * @param string $directive
      * @param bool $allow
      * @return self
@@ -503,6 +524,8 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow filesystem: URIs for a given directive
+     *
      * @param string $directive
      * @param bool $allow
      * @return self
@@ -518,6 +541,8 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow mediastream: URIs for a given directive
+     *
      * @param string $directive
      * @param bool $allow
      * @return self
@@ -533,7 +558,7 @@ class CSPBuilder
     }
 
     /**
-     * Allow self URIs for a given directive
+     * Allow/disallow self URIs for a given directive
      *
      * @param string $directive
      * @param bool $allow
@@ -550,7 +575,7 @@ class CSPBuilder
     }
 
     /**
-     * Allow unsafe-eval
+     * Allow/disallow unsafe-eval within a given directive.
      *
      * @param string $directive
      * @param bool $allow
@@ -567,7 +592,7 @@ class CSPBuilder
     }
 
     /**
-     * Allow unsafe-inline
+     * Allow/disallow unsafe-inline within a given directive.
      *
      * @param string $directive
      * @param bool $allow
@@ -584,7 +609,10 @@ class CSPBuilder
     }
 
     /**
-     * Set a directive
+     * Set a directive.
+     *
+     * This lets you overwrite a complex directive entirely (e.g. script-src)
+     * or set a top-level directive (e.g. report-uri).
      *
      * @param string $key
      * @param mixed $value
@@ -598,6 +626,9 @@ class CSPBuilder
     }
 
     /**
+     * Set the Report URI to the desired string. This also sets the 'report-to'
+     * component of the CSP header for CSP Level 3 compatibility.
+     *
      * @param string $url
      * @return self
      */

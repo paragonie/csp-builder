@@ -24,17 +24,42 @@ $csp->sendCSPHeader();
 
 ```
 
-## Build a Content Security Policy header from a dynamic configuration
+You can also load the configuration from a JSON string, like so:
 
 ```php
 <?php
 
 use \ParagonIE\CSPBuilder\CSPBuilder;
 
+$configuration = file_get_contents('/path/to/source.json');
+if (!is_string($configuration)) {
+    throw new Error('Could not read configuration file!');
+}
 $csp = CSPBuilder::fromData($configuration);
 $csp->sendCSPHeader();
 
 ```
+
+Finally, you can just pass an array to the first argument of the constructor:
+
+```php
+<?php
+
+use \ParagonIE\CSPBuilder\CSPBuilder;
+
+$configuration = file_get_contents('/path/to/source.json');
+if (!is_string($configuration)) {
+    throw new Error('Could not read configuration file!');
+}
+$decoded = json_decode($configuration, true);
+if (!is_array($decoded)) {
+  throw new Error('Could not parse configuration!');
+}
+$csp = new CSPBuilder($decoded);
+$csp->sendCSPHeader();
+
+```
+
 
 ### Example
 
@@ -63,6 +88,7 @@ $csp->sendCSPHeader();
     },
     "frame-ancestors": [],
     "img-src": {
+        "blob": true,
         "self": true,
         "data": true
     },
@@ -131,7 +157,11 @@ $csp->addSource('image', 'https://ytimg.com')
 * `hash()`
 * `preHash()`
 * `setDirective()`
+* `setBlobAllowed()`
 * `setDataAllowed()`
+* `setFileSystemAllowed()`
+* `setMediaStreamAllowed()`
+* `setReportUri()`
 * `setSelfAllowed()`
 * `setAllowUnsafeEval()`
 * `setAllowUnsafeInline()`
