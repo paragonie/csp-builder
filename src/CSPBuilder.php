@@ -230,7 +230,7 @@ class CSPBuilder
      */
     public function disableOldBrowserSupport(): self
     {
-        $this->needsCompile = $this->supportOldBrowsers !== false;
+        $this->needsCompile = ($this->needsCompile || $this->supportOldBrowsers !== false);
         $this->supportOldBrowsers = false;
         return $this;
     }
@@ -244,7 +244,7 @@ class CSPBuilder
      */
     public function enableOldBrowserSupport(): self
     {
-        $this->needsCompile = $this->supportOldBrowsers !== true;
+        $this->needsCompile = ($this->needsCompile || $this->supportOldBrowsers !== true);
         $this->supportOldBrowsers = true;
         return $this;
     }
@@ -819,7 +819,7 @@ class CSPBuilder
      */
     public function disableHttpsTransformOnHttpsConnections(): self
     {
-        $this->needsCompile = $this->httpsTransformOnHttpsConnections !== false;
+        $this->needsCompile = ($this->needsCompile || $this->httpsTransformOnHttpsConnections !== false);
         $this->httpsTransformOnHttpsConnections = false;
 
         return $this;
@@ -834,7 +834,7 @@ class CSPBuilder
      */
     public function enableHttpsTransformOnHttpsConnections(): self
     {
-        $this->needsCompile = $this->httpsTransformOnHttpsConnections !== true;
+        $this->needsCompile = ($this->needsCompile || $this->httpsTransformOnHttpsConnections !== true);
         $this->httpsTransformOnHttpsConnections = true;
 
         return $this;
