@@ -646,7 +646,7 @@ class CSPBuilder
      */
     public function setUnsafeInlineAllowed(string $directive = '', bool $allow = false): self
     {
-        return $this->setAllowUnsafeEval($directive, $allow);
+        return $this->setAllowUnsafeInline($directive, $allow);
     }
 
     /**
