@@ -32,7 +32,7 @@
     "require": {
         "php": "^5.5|^7",
         "paragonie/constant_time_encoding": "^1|^2",
-        "paragonie/random_compat": "^1.4"
+        "paragonie/random_compat": ">= 1"
     },
     "require-dev": {
         "psr/http-message": "^1",
