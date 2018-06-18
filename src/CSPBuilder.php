@@ -339,7 +339,7 @@ class CSPBuilder
     }
 
     /**
-     * @return array<string, string>
+     * @return array<int, array{0:string, 1:string}>
      */
     public function getRequireHeaders(): array
     {
