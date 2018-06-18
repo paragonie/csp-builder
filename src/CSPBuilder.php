@@ -20,6 +20,11 @@ class CSPBuilder
     private $policies = [];
 
     /**
+     * @var array<int, string>
+     */
+    private $requireSRIFor = [];
+
+    /**
      * @var bool
      */
     private $needsCompile = true;
@@ -62,7 +67,8 @@ class CSPBuilder
         'plugin-types',
         'manifest-src',
         'script-src',
-        'style-src'
+        'style-src',
+        'worker-src'
     ];
 
     /**
@@ -181,6 +187,9 @@ class CSPBuilder
             case 'css':
             case 'css-src':
                 $directive = 'style-src';
+                break;
+            case 'worker':
+                $directive = 'worker-src';
                 break;
         }
         $this->policies[$directive]['allow'][] = $path;
@@ -330,6 +339,21 @@ class CSPBuilder
     }
 
     /**
+     * @return array<int, array{0:string, 1:string}>
+     */
+    public function getRequireHeaders(): array
+    {
+        $headers = [];
+        foreach ($this->requireSRIFor as $directive) {
+            $headers[] = [
+                'Content-Security-Policy',
+                'require-sri-for ' . $directive
+            ];
+        }
+        return $headers;
+    }
+
+    /**
      * Add a new hash to the existing CSP
      *
      * @param string $directive
@@ -369,6 +393,10 @@ class CSPBuilder
         if ($this->needsCompile) {
             $this->compile();
         }
+        foreach ($this->getRequireHeaders() as $header) {
+            list ($key, $value) = $header;
+            $message = $message->withAddedHeader($key, $value);
+        }
         foreach ($this->getHeaderKeys($legacy) as $key) {
             $message = $message->withAddedHeader($key, $this->compiled);
         }
@@ -381,6 +409,7 @@ class CSPBuilder
      * @param string $directive
      * @param string $nonce (if empty, it will be generated)
      * @return string
+     * @throws \Exception
      */
     public function nonce(string $directive = 'script-src', string $nonce = ''): string
     {
@@ -414,6 +443,18 @@ class CSPBuilder
             $this->policies[$directive]['hashes'] []= [
                 $algorithm => $hash
             ];
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $directive
+     * @return self
+     */
+    public function requireSRIFor(string $directive): self
+    {
+        if (!\in_array($directive, $this->requireSRIFor, true)) {
+            $this->requireSRIFor[] = $directive;
         }
         return $this;
     }
@@ -482,6 +523,10 @@ class CSPBuilder
         }
         if ($this->needsCompile) {
             $this->compile();
+        }
+        foreach ($this->getRequireHeaders() as $header) {
+            list ($key, $value) = $header;
+            \header($key.': '.$value);
         }
         foreach ($this->getHeaderKeys($legacy) as $key) {
             \header($key.': '.$this->compiled);
@@ -631,6 +676,7 @@ class CSPBuilder
      * @param string $directive
      * @param bool $allow
      * @return self
+     * @throws \Exception
      */
     public function setUnsafeEvalAllowed(string $directive = '', bool $allow = false): self
     {
@@ -643,10 +689,26 @@ class CSPBuilder
      * @param string $directive
      * @param bool $allow
      * @return self
+     * @throws \Exception
      */
     public function setUnsafeInlineAllowed(string $directive = '', bool $allow = false): self
     {
         return $this->setAllowUnsafeInline($directive, $allow);
+    }
+
+    /**
+     * Set strict-dynamic for a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     *
+     * @return self
+     * @throws \Exception
+     */
+    public function setStrictDynamic(string $directive = '', bool $allow = false): self
+    {
+        $this->policies[$directive]['strict-dynamic'] = $allow;
+        return $this;
     }
 
     /**
