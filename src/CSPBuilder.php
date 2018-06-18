@@ -62,7 +62,8 @@ class CSPBuilder
         'plugin-types',
         'manifest-src',
         'script-src',
-        'style-src'
+        'style-src',
+        'worker-src'
     ];
 
     /**
@@ -181,6 +182,9 @@ class CSPBuilder
             case 'css':
             case 'css-src':
                 $directive = 'style-src';
+                break;
+            case 'worker':
+                $directive = 'worker-src';
                 break;
         }
         $this->policies[$directive]['allow'][] = $path;
