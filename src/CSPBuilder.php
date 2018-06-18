@@ -20,6 +20,11 @@ class CSPBuilder
     private $policies = [];
 
     /**
+     * @var array<int, string>
+     */
+    private $requireSRIFor = [];
+
+    /**
      * @var bool
      */
     private $needsCompile = true;
@@ -334,6 +339,21 @@ class CSPBuilder
     }
 
     /**
+     * @return array<string, string>
+     */
+    public function getRequireHeaders(): array
+    {
+        $headers = [];
+        foreach ($this->requireSRIFor as $directive) {
+            $headers[] = [
+                'Content-Security-Policy',
+                'require-sri-for ' . $directive
+            ];
+        }
+        return $headers;
+    }
+
+    /**
      * Add a new hash to the existing CSP
      *
      * @param string $directive
@@ -372,6 +392,10 @@ class CSPBuilder
     {
         if ($this->needsCompile) {
             $this->compile();
+        }
+        foreach ($this->getRequireHeaders() as $header) {
+            list ($key, $value) = $header;
+            $message = $message->withAddedHeader($key, $value);
         }
         foreach ($this->getHeaderKeys($legacy) as $key) {
             $message = $message->withAddedHeader($key, $this->compiled);
@@ -419,6 +443,18 @@ class CSPBuilder
             $this->policies[$directive]['hashes'] []= [
                 $algorithm => $hash
             ];
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $directive
+     * @return self
+     */
+    public function requireSRIFor(string $directive): self
+    {
+        if (!\in_array($directive, $this->requireSRIFor, true)) {
+            $this->requireSRIFor[] = $directive;
         }
         return $this;
     }
@@ -487,6 +523,10 @@ class CSPBuilder
         }
         if ($this->needsCompile) {
             $this->compile();
+        }
+        foreach ($this->getRequireHeaders() as $header) {
+            list ($key, $value) = $header;
+            \header($key.': '.$value);
         }
         foreach ($this->getHeaderKeys($legacy) as $key) {
             \header($key.': '.$this->compiled);
