@@ -206,3 +206,8 @@ $policy->saveSnippet(
 ```
 
 Make sure you reload your webserver afterwards.
+
+## Support Contracts
+
+If your company uses this library in their products or services, you may be
+interested in [purchasing a support contract from Paragon Initiative Enterprises](https://paragonie.com/enterprise).
