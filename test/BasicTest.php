@@ -3,10 +3,17 @@
 namespace ParagonIE\CSPBuilderTest;
 
 use ParagonIE\CSPBuilder\CSPBuilder;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class BasicTest extends PHPUnit_Framework_TestCase
+/**
+ * Class BasicTest
+ * @package ParagonIE\CSPBuilderTest
+ */
+class BasicTest extends TestCase
 {
+    /**
+     * @throws \Exception
+     */
     public function testBasicFromFile()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
@@ -46,6 +53,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testBasicFromData()
     {
         $data = file_get_contents(__DIR__.'/vectors/basic-csp.json');
@@ -59,6 +69,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testHash()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
@@ -69,6 +82,9 @@ class BasicTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testPreHash()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
@@ -135,6 +151,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers CSPBuilder::setDataAllowed()
+     * @throws \Exception
      */
     public function testAllowDataUris()
     {
@@ -144,9 +161,26 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
         $this->assertContains("data:", $compiled);
     }
+    /**
+     * @covers CSPBuilder::setSelfAllowed()
+     * @throws \Exception
+     */
+    public function testRequireSRI()
+    {
+        $csp = new CSPBuilder();
+        $csp->setSelfAllowed('script-src', true)
+            ->addSource('script-src', 'self')
+            ->requireSRIFor('script');
+        $require = \json_encode($csp->getRequireHeaders());
+        $this->assertEquals(
+            '[["Content-Security-Policy","require-sri-for script"]]',
+            $require
+        );
+    }
 
     /**
      * @covers CSPBuilder::setSelfAllowed()
+     * @throws \Exception
      */
     public function testAllowSelfUris()
     {
@@ -159,6 +193,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers CSPBuilder::setAllowUnsafeEval()
+     * @throws \Exception
      */
     public function testAllowUnsafeEval()
     {
@@ -171,6 +206,7 @@ class BasicTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers CSPBuilder::setAllowUnsafeInline()
+     * @throws \Exception
      */
     public function testAllowUnsafeInline()
     {
