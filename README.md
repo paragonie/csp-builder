@@ -1,6 +1,10 @@
 # Content Security Policy Builder
 
 [![Build Status](https://travis-ci.org/paragonie/csp-builder.svg?branch=master)](https://travis-ci.org/paragonie/csp-builder)
+[![Latest Stable Version](https://poser.pugx.org/paragonie/csp-builder/v/stable)](https://packagist.org/packages/paragonie/csp-builder)
+[![Latest Unstable Version](https://poser.pugx.org/paragonie/csp-builder/v/unstable)](https://packagist.org/packages/paragonie/csp-builder)
+[![License](https://poser.pugx.org/paragonie/csp-builder/license)](https://packagist.org/packages/paragonie/csp-builder)
+[![Downloads](https://img.shields.io/packagist/dt/paragonie/csp-builder.svg)](https://packagist.org/packages/paragonie/csp-builder)
 
 Easily integrate Content-Security-Policy headers into your web application, either
 from a JSON configuration file, or programatically.
