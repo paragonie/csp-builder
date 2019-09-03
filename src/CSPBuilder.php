@@ -726,6 +726,18 @@ class CSPBuilder
         $this->policies['report-uri'] = $url;
         return $this;
     }
+    
+    /**
+     * Set the report-to directive to the desired string.
+     *
+     * @param string $policy
+     * @return self
+     */
+    public function setReportUri(string $policy = ''): self
+    {
+        $this->policies['report-to'] = $policy;
+        return $this;
+    }
 
     /**
      * Compile a subgroup into a policy string
