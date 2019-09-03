@@ -733,7 +733,7 @@ class CSPBuilder
      * @param string $policy
      * @return self
      */
-    public function setReportUri(string $policy = ''): self
+    public function setReportTo(string $policy = ''): self
     {
         $this->policies['report-to'] = $policy;
         return $this;
