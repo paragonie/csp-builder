@@ -1,6 +1,7 @@
 {
     "report-only": false,
     "report-uri": "/csp_violation",
+    "report-to": "csp",
     "base-uri": {
         "self": true
     },

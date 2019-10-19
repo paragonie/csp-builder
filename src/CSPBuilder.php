@@ -114,10 +114,13 @@ class CSPBuilder
             if (!\is_string($this->policies['report-uri'])) {
                 throw new \TypeError('report-uri policy somehow not a string');
             }
-            if ($this->supportOldBrowsers) {
-                $compiled [] = 'report-uri ' . $this->policies['report-uri'] . '; ';
+            $compiled [] = 'report-uri ' . $this->policies['report-uri'] . '; ';
+        }
+        if (!empty($this->policies['report-to'])) {
+            if (!\is_string($this->policies['report-to'])) {
+                throw new \TypeError('report-to policy somehow not a string');
             }
-            $compiled []= 'report-to ' . $this->policies['report-uri'] . '; ';
+            $compiled []= 'report-to ' . $this->policies['report-to'] . '; ';
         }
         if (!empty($this->policies['upgrade-insecure-requests'])) {
             $compiled []= 'upgrade-insecure-requests';
@@ -721,6 +724,18 @@ class CSPBuilder
     public function setReportUri(string $url = ''): self
     {
         $this->policies['report-uri'] = $url;
+        return $this;
+    }
+    
+    /**
+     * Set the report-to directive to the desired string.
+     *
+     * @param string $policy
+     * @return self
+     */
+    public function setReportTo(string $policy = ''): self
+    {
+        $this->policies['report-to'] = $policy;
         return $this;
     }
 
