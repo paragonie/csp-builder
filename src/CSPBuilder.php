@@ -741,7 +741,7 @@ class CSPBuilder
         } elseif (empty($policies)) {
             if ($directive === 'plugin-types') {
                 return '';
-            } else if ($directive === 'sandbox') {
+            } elseif ($directive === 'sandbox') {
                 return $directive.'; ';
             }
             return $directive." 'none'; ";
