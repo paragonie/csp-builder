@@ -78,6 +78,7 @@ $csp->sendCSPHeader();
 ```json
 {
     "report-only": false,
+    "report-to": "PolicyName",
     "report-uri": "/csp_violation_reporting_endpoint",
     "base-uri": [],
     "default-src": [],    
