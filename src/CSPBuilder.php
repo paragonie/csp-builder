@@ -66,6 +66,7 @@ class CSPBuilder
         'object-src',
         'plugin-types',
         'manifest-src',
+        'sandbox',
         'script-src',
         'style-src',
         'worker-src'
@@ -755,6 +756,8 @@ class CSPBuilder
         } elseif (empty($policies)) {
             if ($directive === 'plugin-types') {
                 return '';
+            } elseif ($directive === 'sandbox') {
+                return $directive.'; ';
             }
             return $directive." 'none'; ";
         }
@@ -771,7 +774,7 @@ class CSPBuilder
             foreach ($policies['allow'] as $url) {
                 $url = \filter_var($url, FILTER_SANITIZE_URL);
                 if ($url !== false) {
-                    if ($this->supportOldBrowsers) {
+                    if ($this->supportOldBrowsers && $directive !== 'sandbox') {
                         if (\strpos($url, '://') === false) {
                             if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections)
                                 || !empty($this->policies['upgrade-insecure-requests'])) {
