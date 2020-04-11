@@ -241,7 +241,7 @@ class BasicTest extends TestCase
         $this->assertEquals($compiled, 'sandbox allow-popups-to-escape-sandbox; ');
     }
 
-        /**
+    /**
      * @covers \ParagonIE\CSPBuilder\CSPBuilder
      */
     public function testRemovingDirectives()
