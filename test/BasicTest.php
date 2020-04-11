@@ -240,4 +240,24 @@ class BasicTest extends TestCase
 
         $this->assertEquals($compiled, 'sandbox allow-popups-to-escape-sandbox; ');
     }
+
+        /**
+     * @covers \ParagonIE\CSPBuilder\CSPBuilder
+     */
+    public function testRemovingDirectives()
+    {
+        $csp = new CSPBuilder();
+        $csp->addSource('frame-ancestors', 'https://example.com');
+        $csp->addSource('style-src', 'https://example.com');
+        $compiled = $csp->compile();
+
+        $this->assertContains('frame-ancestors https://example.com', $compiled);
+        $this->assertContains('style-src https://example.com', $compiled);
+
+        $csp->removeDirective('style-src');
+        $compiled = $csp->compile();
+
+        $this->assertContains('frame-ancestors https://example.com', $compiled);
+        $this->assertNotContains('style-src https://example.com', $compiled);
+    }
 }
