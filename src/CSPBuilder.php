@@ -624,6 +624,22 @@ class CSPBuilder
     }
 
     /**
+     * Removes a directive.
+     *
+     * This allows removing a directive if the presence of it might cause
+     * undesired behavioral changes.
+     *
+     * @param string $key
+     *
+     * @return self
+     */
+    public function removeDirective(string $key): self
+    {
+        unset($this->policies[$key]);
+        return $this;
+    }
+
+    /**
      * Allow/disallow filesystem: URIs for a given directive
      *
      * @param string $directive
