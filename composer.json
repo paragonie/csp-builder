@@ -30,14 +30,17 @@
         }
     },
     "require": {
-        "php": "^7",
+        "php": "^7.1|^8",
         "paragonie/constant_time_encoding": "^2"
     },
     "require-dev": {
         "psr/http-message": "^1",
-        "phpunit/phpunit": "4.*|5.*",
+        "phpunit/phpunit": "^7|^8|^9",
         "squizlabs/php_codesniffer": "^3",
         "vimeo/psalm": "^3"
+    },
+    "scripts": {
+        "test": "phpunit && psalm"
     },
     "suggest": {
         "psr/http-message": "For CSPBuilder::injectCSPHeader()"

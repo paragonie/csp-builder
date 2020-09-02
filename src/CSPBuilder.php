@@ -15,7 +15,7 @@ class CSPBuilder
     const FORMAT_NGINX = 'nginx';
 
     /**
-     * @var array
+     * @var array<array-key, mixed>
      */
     private $policies = [];
 
@@ -142,6 +142,7 @@ class CSPBuilder
      */
     public function addSource(string $directive, string $path): self
     {
+        $this->needsCompile = true;
         switch ($directive) {
             case 'child':
             case 'frame':
@@ -212,6 +213,7 @@ class CSPBuilder
      */
     public function addDirective(string $key, $value = null): self
     {
+        $this->needsCompile = true;
         if ($value === null) {
             if (!isset($this->policies[$key])) {
                 $this->policies[$key] = true;
@@ -777,6 +779,8 @@ class CSPBuilder
             }
             return $directive." 'none'; ";
         }
+        /** @var array<array-key, mixed> $policies */
+
         $ret = $directive.' ';
         if ($directive === 'plugin-types') {
             // Expects MIME types, not URLs
@@ -787,9 +791,12 @@ class CSPBuilder
         }
 
         if (!empty($policies['allow'])) {
-            foreach ($policies['allow'] as $url) {
+            /** @var array<array-key, string> $allowedPolicies */
+            $allowedPolicies = $policies['allow'];
+            foreach ($allowedPolicies as $url) {
+                /** @var string|bool $url */
                 $url = \filter_var($url, FILTER_SANITIZE_URL);
-                if ($url !== false) {
+                if (\is_string($url)) {
                     if ($this->supportOldBrowsers && $directive !== 'sandbox') {
                         if (\strpos($url, '://') === false) {
                             if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections)
@@ -812,7 +819,14 @@ class CSPBuilder
         }
 
         if (!empty($policies['hashes'])) {
-            foreach ($policies['hashes'] as $hash) {
+            /** @var array<array-key, array<string, string>> $hashes */
+            $hashes = $policies['hashes'];
+            /** @var array<string, string> $hash */
+            foreach ($hashes as $hash) {
+                /**
+                 * @var string $algo
+                 * @var string $hashval
+                 */
                 foreach ($hash as $algo => $hashval) {
                     $ret .= \implode('', [
                         "'",
@@ -826,7 +840,10 @@ class CSPBuilder
         }
 
         if (!empty($policies['nonces'])) {
-            foreach ($policies['nonces'] as $nonce) {
+            /** @var array<array-key, string> $nonces */
+            $nonces = $policies['nonces'];
+            /** @var string $nonce */
+            foreach ($nonces as $nonce) {
                 $ret .= \implode('', [
                     "'nonce-",
                     \preg_replace('/[^A-Za-z0-9\+\/=]/', '', $nonce),
@@ -836,8 +853,11 @@ class CSPBuilder
         }
 
         if (!empty($policies['types'])) {
-            foreach ($policies['types'] as $type) {
-                $ret .= $type.' ';
+            /** @var array<array-key, string> $types */
+            $types = $policies['types'];
+            /** @var string $type */
+            foreach ($types as $type) {
+                $ret .= $type . ' ';
             }
         }
 

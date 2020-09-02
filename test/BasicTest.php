@@ -4,6 +4,7 @@ namespace ParagonIE\CSPBuilderTest;
 
 use ParagonIE\CSPBuilder\CSPBuilder;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Class BasicTest
@@ -103,7 +104,7 @@ class BasicTest extends TestCase
      */
     public function testSourceHttpsConversion()
     {
-        /** @var CSPBuilder|\PHPUnit_Framework_MockObject_MockObject $cspHttp */
+        /** @var CSPBuilder|MockObject $cspHttp */
         $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
             ->disableOriginalConstructor()->getMock();
         $cspHttp->method('isHTTPSConnection')->willReturn(false);
@@ -111,11 +112,12 @@ class BasicTest extends TestCase
         $cspHttp->addSource('form', 'http://example.com');
         $cspHttp->addSource('form', 'another.com');
         $cspHttp->enableHttpsTransformOnHttpsConnections(); // enabled by default
+        /** @var string $compiledCspHttp */
         $compiledCspHttp = $cspHttp->compile();
-        $this->assertContains('http://example.com', $compiledCspHttp);
-        $this->assertContains('http://another.com', $compiledCspHttp);
+        $this->assertStringContainsString('http://example.com', $compiledCspHttp);
+        $this->assertStringContainsString('http://another.com', $compiledCspHttp);
 
-        /** @var CSPBuilder|\PHPUnit_Framework_MockObject_MockObject $cspHttps */
+        /** @var CSPBuilder|MockObject $cspHttps */
         $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
             ->disableOriginalConstructor()->getMock();
         $cspHttps->method('isHTTPSConnection')->willReturn(true);
@@ -123,16 +125,17 @@ class BasicTest extends TestCase
         $cspHttps->addSource('form', 'http://example.com');
         $cspHttps->addSource('form', 'another.com');
 
+        /** @var string $compiledCspHttpsWithConvertEnabled */
         $compiledCspHttpsWithConvertEnabled = $cspHttps->compile();
-        $this->assertContains('https://example.com', $compiledCspHttpsWithConvertEnabled);
-        $this->assertContains('https://another.com', $compiledCspHttpsWithConvertEnabled);
-        $this->assertNotContains('http://example.com', $compiledCspHttpsWithConvertEnabled);
-        $this->assertNotContains('http://another.com', $compiledCspHttpsWithConvertEnabled);
+        $this->assertStringContainsString('https://example.com', $compiledCspHttpsWithConvertEnabled);
+        $this->assertStringContainsString('https://another.com', $compiledCspHttpsWithConvertEnabled);
+        $this->assertStringNotContainsString('http://example.com', $compiledCspHttpsWithConvertEnabled);
+        $this->assertStringNotContainsString('http://another.com', $compiledCspHttpsWithConvertEnabled);
 
         $cspHttps->disableHttpsTransformOnHttpsConnections();
         $compiledCspHttpsWithConvertDisabled = $cspHttps->compile();
-        $this->assertContains('http://example.com', $compiledCspHttpsWithConvertDisabled);
-        $this->assertContains('http://another.com', $compiledCspHttpsWithConvertDisabled);
+        $this->assertStringContainsString('http://example.com', $compiledCspHttpsWithConvertDisabled);
+        $this->assertStringContainsString('http://another.com', $compiledCspHttpsWithConvertDisabled);
     }
 
     /**
@@ -145,8 +148,8 @@ class BasicTest extends TestCase
         $csp->disableHttpsTransformOnHttpsConnections();
         $csp->addDirective('upgrade-insecure-requests');
         $compiled = $csp->compile();
-        $this->assertContains('https://example.com', $compiled);
-        $this->assertNotContains('http://example.com', $compiled);
+        $this->assertStringContainsString('https://example.com', $compiled);
+        $this->assertStringNotContainsString('http://example.com', $compiled);
     }
 
     /**
@@ -159,7 +162,7 @@ class BasicTest extends TestCase
         $csp->setDataAllowed('img-src', true);
         $compiled = $csp->compile();
 
-        $this->assertContains("data:", $compiled);
+        $this->assertStringContainsString("data:", $compiled);
     }
     /**
      * @covers CSPBuilder::setSelfAllowed()
@@ -188,7 +191,7 @@ class BasicTest extends TestCase
         $csp->setSelfAllowed('img-src', true);
         $compiled = $csp->compile();
 
-        $this->assertContains("'self'", $compiled);
+        $this->assertStringContainsString("'self'", $compiled);
     }
 
     /**
@@ -201,7 +204,7 @@ class BasicTest extends TestCase
         $csp->setAllowUnsafeEval('script-src', true);
         $compiled = $csp->compile();
 
-        $this->assertContains("'unsafe-eval'", $compiled);
+        $this->assertStringContainsString("'unsafe-eval'", $compiled);
     }
 
     /**
@@ -214,7 +217,7 @@ class BasicTest extends TestCase
         $csp->setAllowUnsafeInline('script-src', true);
         $compiled = $csp->compile();
 
-        $this->assertContains("'unsafe-inline'", $compiled);
+        $this->assertStringContainsString("'unsafe-inline'", $compiled);
     }
 
     /**
@@ -251,13 +254,13 @@ class BasicTest extends TestCase
         $csp->addSource('style-src', 'https://example.com');
         $compiled = $csp->compile();
 
-        $this->assertContains('frame-ancestors https://example.com', $compiled);
-        $this->assertContains('style-src https://example.com', $compiled);
+        $this->assertStringContainsString('frame-ancestors https://example.com', $compiled);
+        $this->assertStringContainsString('style-src https://example.com', $compiled);
 
         $csp->removeDirective('style-src');
         $compiled = $csp->compile();
 
-        $this->assertContains('frame-ancestors https://example.com', $compiled);
-        $this->assertNotContains('style-src https://example.com', $compiled);
+        $this->assertStringContainsString('frame-ancestors https://example.com', $compiled);
+        $this->assertStringNotContainsString('style-src https://example.com', $compiled);
     }
 }
