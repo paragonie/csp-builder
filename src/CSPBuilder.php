@@ -734,6 +734,21 @@ class CSPBuilder
     }
 
     /**
+     * Set report-sample for a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     *
+     * @return self
+     * @throws \Exception
+     */
+    public function setReportSample(string $directive = '', bool $allow = false): self
+    {
+        $this->policies[$directive]['report-sample'] = $allow;
+        return $this;
+    }
+
+    /**
      * Set the Report URI to the desired string. This also sets the 'report-to'
      * component of the CSP header for CSP Level 3 compatibility.
      *
@@ -881,6 +896,9 @@ class CSPBuilder
         }
         if (!empty($policies['strict-dynamic'])) {
             $ret .= "'strict-dynamic' ";
+		}
+        if (!empty($policies['report-sample'])) {
+            $ret .= "'report-sample' ";
         }
         if (!empty($policies['unsafe-hashed-attributes'])) {
             $ret .= "'unsafe-hashed-attributes' ";
