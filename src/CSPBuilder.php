@@ -896,7 +896,7 @@ class CSPBuilder
         }
         if (!empty($policies['strict-dynamic'])) {
             $ret .= "'strict-dynamic' ";
-		}
+        }
         if (!empty($policies['report-sample'])) {
             $ret .= "'report-sample' ";
         }
