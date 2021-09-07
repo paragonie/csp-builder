@@ -197,7 +197,9 @@ class CSPBuilder
                 $directive = 'worker-src';
                 break;
         }
-        $this->policies[$directive]['allow'][] = $path;
+        if (!in_array($path, $this->policies[$directive]['allow'], true)) {
+            $this->policies[$directive]['allow'][] = $path;
+        }
         return $this;
     }
 
