@@ -1,7 +1,5 @@
 <?php
-
 declare(strict_types=1);
-
 namespace ParagonIE\CSPBuilder;
 
 use \ParagonIE\ConstantTime\Base64;
@@ -106,7 +104,7 @@ class CSPBuilder
                         continue;
                     }
                 }
-                $compiled[] = $this->compileSubgroup(
+                $compiled []= $this->compileSubgroup(
                     $dir,
                     $this->policies[$dir]
                 );
@@ -117,16 +115,16 @@ class CSPBuilder
             if (!\is_string($this->policies['report-uri'])) {
                 throw new \TypeError('report-uri policy somehow not a string');
             }
-            $compiled[] = 'report-uri ' . $this->policies['report-uri'] . '; ';
+            $compiled [] = 'report-uri ' . $this->policies['report-uri'] . '; ';
         }
         if (!empty($this->policies['report-to'])) {
             if (!\is_string($this->policies['report-to'])) {
                 throw new \TypeError('report-to policy somehow not a string');
             }
-            $compiled[] = 'report-to ' . $this->policies['report-to'] . '; ';
+            $compiled []= 'report-to ' . $this->policies['report-to'] . '; ';
         }
         if (!empty($this->policies['upgrade-insecure-requests'])) {
-            $compiled[] = 'upgrade-insecure-requests';
+            $compiled []= 'upgrade-insecure-requests';
         }
 
         $this->compiled = \implode('', $compiled);
@@ -234,7 +232,7 @@ class CSPBuilder
      */
     public function allowPluginType(string $mime = 'text/plain'): self
     {
-        $this->policies['plugin-types']['types'][] = $mime;
+        $this->policies['plugin-types']['types'] []= $mime;
 
         $this->needsCompile = true;
         return $this;
@@ -306,7 +304,7 @@ class CSPBuilder
     public static function fromFile(string $filename = ''): self
     {
         if (!\file_exists($filename)) {
-            throw new \Exception($filename . ' does not exist');
+            throw new \Exception($filename.' does not exist');
         }
         $contents = \file_get_contents($filename);
         if (!\is_string($contents)) {
@@ -376,7 +374,7 @@ class CSPBuilder
     ): self {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
-            $this->policies[$directive]['hashes'][] = [
+            $this->policies[$directive]['hashes'] []= [
                 $algorithm => Base64::encode(
                     \hash($algorithm, $script, true)
                 )
@@ -402,7 +400,7 @@ class CSPBuilder
             $this->compile();
         }
         foreach ($this->getRequireHeaders() as $header) {
-            list($key, $value) = $header;
+            list ($key, $value) = $header;
             $message = $message->withAddedHeader($key, $value);
         }
         foreach ($this->getHeaderKeys($legacy) as $key) {
@@ -429,7 +427,7 @@ class CSPBuilder
         if (empty($nonce)) {
             $nonce = Base64::encode(\random_bytes(18));
         }
-        $this->policies[$directive]['nonces'][] = $nonce;
+        $this->policies[$directive]['nonces'] []= $nonce;
         return $nonce;
     }
 
@@ -448,7 +446,7 @@ class CSPBuilder
     ): self {
         $ruleKeys = \array_keys($this->policies);
         if (\in_array($directive, $ruleKeys)) {
-            $this->policies[$directive]['hashes'][] = [
+            $this->policies[$directive]['hashes'] []= [
                 $algorithm => $hash
             ];
         }
@@ -512,7 +510,7 @@ class CSPBuilder
                 ]);
                 break;
             default:
-                throw new \Exception('Unknown format: ' . $format);
+                throw new \Exception('Unknown format: '.$format);
         }
 
         if ($hookBeforeSave !== null) {
@@ -539,11 +537,11 @@ class CSPBuilder
             $this->compile();
         }
         foreach ($this->getRequireHeaders() as $header) {
-            list($key, $value) = $header;
-            \header($key . ': ' . $value);
+            list ($key, $value) = $header;
+            \header($key.': '.$value);
         }
         foreach ($this->getHeaderKeys($legacy) as $key) {
-            \header($key . ': ' . $this->compiled);
+            \header($key.': '.$this->compiled);
         }
         return true;
     }
@@ -753,7 +751,7 @@ class CSPBuilder
         $this->policies['report-uri'] = $url;
         return $this;
     }
-
+    
     /**
      * Set the report-to directive to the desired string.
      *
@@ -783,16 +781,16 @@ class CSPBuilder
             if ($directive === 'plugin-types') {
                 return '';
             } elseif ($directive === 'sandbox') {
-                return $directive . '; ';
+                return $directive.'; ';
             }
-            return $directive . " 'none'; ";
+            return $directive." 'none'; ";
         }
         /** @var array<array-key, mixed> $policies */
 
-        $ret = $directive . ' ';
+        $ret = $directive.' ';
         if ($directive === 'plugin-types') {
             // Expects MIME types, not URLs
-            return $ret . \implode(' ', $policies['allow']) . '; ';
+            return $ret . \implode(' ', $policies['allow']).'; ';
         }
         if (!empty($policies['self'])) {
             $ret .= "'self' ";
@@ -808,21 +806,19 @@ class CSPBuilder
                     if ($this->supportOldBrowsers && $directive !== 'sandbox') {
                         if (\strpos($url, '://') === false) {
                             if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections)
-                                || !empty($this->policies['upgrade-insecure-requests'])
-                            ) {
+                                || !empty($this->policies['upgrade-insecure-requests'])) {
                                 // We only want HTTPS connections here.
-                                $ret .= 'https://' . $url . ' ';
+                                $ret .= 'https://'.$url.' ';
                             } else {
-                                $ret .= 'https://' . $url . ' http://' . $url . ' ';
+                                $ret .= 'https://'.$url.' http://'.$url.' ';
                             }
                         }
                     }
                     if (($this->isHTTPSConnection() && $this->httpsTransformOnHttpsConnections)
-                        || !empty($this->policies['upgrade-insecure-requests'])
-                    ) {
-                        $ret .= \str_replace('http://', 'https://', $url) . ' ';
+                        || !empty($this->policies['upgrade-insecure-requests'])) {
+                        $ret .= \str_replace('http://', 'https://', $url).' ';
                     } else {
-                        $ret .= $url . ' ';
+                        $ret .= $url.' ';
                     }
                 }
             }
@@ -895,7 +891,7 @@ class CSPBuilder
         if (!empty($policies['unsafe-hashed-attributes'])) {
             $ret .= "'unsafe-hashed-attributes' ";
         }
-        return \rtrim($ret, ' ') . '; ';
+        return \rtrim($ret, ' ').'; ';
     }
 
     /**
@@ -915,10 +911,10 @@ class CSPBuilder
 
         // If we're supporting legacy devices, include these too:
         if ($legacy) {
-            $return[] = $this->reportOnly
+            $return []= $this->reportOnly
                 ? 'X-Content-Security-Policy-Report-Only'
                 : 'X-Content-Security-Policy';
-            $return[] = $this->reportOnly
+            $return []= $this->reportOnly
                 ? 'X-Webkit-CSP-Report-Only'
                 : 'X-Webkit-CSP';
         }
