@@ -188,6 +188,12 @@ class CSPBuilder
             case 'scripts':
                 $directive = 'script-src';
                 break;
+            case 'script-src-elem':
+                $directive = 'script-src-elem';
+                break;
+            case 'script-src-attr':
+                $directive = 'script-src-attr';
+                break;
             case 'style':
             case 'css':
             case 'css-src':
