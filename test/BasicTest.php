@@ -276,7 +276,9 @@ class BasicTest extends TestCase
         $basic->saveSnippet(
             $tempfile,
             CSPBuilder::FORMAT_NGINX,
-            fn ($output) =>  \str_replace('ytimg','foo',$output)
+            function  ($output) {
+                return \str_replace('ytimg', 'foo', $output);
+            }  
         );
 
         $this->assertStringContainsString(
