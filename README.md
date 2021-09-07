@@ -1,6 +1,7 @@
 # Content Security Policy Builder
 
-[![Build Status](https://travis-ci.org/paragonie/csp-builder.svg?branch=master)](https://travis-ci.org/paragonie/csp-builder)
+[![Build Status](https://github.com/paragonie/csp-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/paragonie/csp-builder/actions)
+[![Psalm Status](https://github.com/paragonie/csp-builder/actions/workflows/psalm.yml/badge.svg)](https://github.com/paragonie/csp-builder/actions)
 [![Latest Stable Version](https://poser.pugx.org/paragonie/csp-builder/v/stable)](https://packagist.org/packages/paragonie/csp-builder)
 [![Latest Unstable Version](https://poser.pugx.org/paragonie/csp-builder/v/unstable)](https://packagist.org/packages/paragonie/csp-builder)
 [![License](https://poser.pugx.org/paragonie/csp-builder/license)](https://packagist.org/packages/paragonie/csp-builder)
