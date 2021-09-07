@@ -2,10 +2,8 @@
 
 namespace ParagonIE\CSPBuilderTest;
 
-use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use ParagonIE\CSPBuilder\CSPBuilder;
-use org\bovigo\vfs\vfsStreamDirectory;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
