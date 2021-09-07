@@ -682,6 +682,23 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow loading resources only over HTTPS on any domain for a given directive
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws \Exception
+     */
+    public function setHttpsAllowed(string $directive = '', bool $allow = false): self
+    {
+        if (!\in_array($directive, self::$directives)) {
+            throw new \Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['https'] = $allow;
+        return $this;
+    }
+
+    /**
      * Allow/disallow self URIs for a given directive
      *
      * @param string $directive
@@ -884,6 +901,9 @@ class CSPBuilder
         }
         if (!empty($policies['filesystem'])) {
             $ret .= "filesystem: ";
+        }
+        if (!empty($policies['https'])) {
+            $ret .= "https: ";
         }
         if (!empty($policies['strict-dynamic'])) {
             $ret .= "'strict-dynamic' ";

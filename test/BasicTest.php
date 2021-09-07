@@ -164,6 +164,20 @@ class BasicTest extends TestCase
 
         $this->assertStringContainsString("data:", $compiled);
     }
+
+    /**
+     * @covers CSPBuilder::setHttpsAllowed()
+     * @throws \Exception
+     */
+    public function testAllowHttps()
+    {
+        $csp = new CSPBuilder();
+        $csp->setHttpsAllowed('script-src', true);
+        $compiled = $csp->compile();
+
+        $this->assertStringContainsString("https:", $compiled);
+    }
+
     /**
      * @covers CSPBuilder::setSelfAllowed()
      * @throws \Exception
