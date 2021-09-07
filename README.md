@@ -213,6 +213,19 @@ $policy->saveSnippet(
 
 Make sure you reload your webserver afterwards.
 
+## Processing output before save to disk through hook
+
+```php
+$policy = CSPBuilder::fromFile('/path/to/source.json');
+$policy->saveSnippet(
+    '/etc/nginx/snippets/my-csp.conf',
+    CSPBuilder::FORMAT_NGINX
+    fn ($output) =>  \str_replace('bar','foo',$output)
+);
+```
+
+The output will change before save to file
+
 ## Support Contracts
 
 If your company uses this library in their products or services, you may be

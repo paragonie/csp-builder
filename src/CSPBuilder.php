@@ -475,7 +475,8 @@ class CSPBuilder
      */
     public function saveSnippet(
         string $outputFile,
-        string $format = self::FORMAT_NGINX
+        string $format = self::FORMAT_NGINX,
+        callable $hookBeforeSave = null
     ): bool {
         if ($this->needsCompile) {
             $this->compile();
@@ -511,6 +512,11 @@ class CSPBuilder
             default:
                 throw new \Exception('Unknown format: '.$format);
         }
+
+        if ($hookBeforeSave !== null) {
+            $output = $hookBeforeSave($output);
+        }
+
         return \file_put_contents($outputFile, $output) !== false;
     }
 

@@ -2,8 +2,8 @@
 
 namespace ParagonIE\CSPBuilderTest;
 
-use ParagonIE\CSPBuilder\CSPBuilder;
 use PHPUnit\Framework\TestCase;
+use ParagonIE\CSPBuilder\CSPBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
@@ -263,4 +263,48 @@ class BasicTest extends TestCase
         $this->assertStringContainsString('frame-ancestors https://example.com', $compiled);
         $this->assertStringNotContainsString('style-src https://example.com', $compiled);
     }
+
+    public function testSaveSnippetWithHookBeforeSave()
+    {
+        $data = \file_get_contents(__DIR__ . '/vectors/basic-csp.json');
+
+        $basic = CSPBuilder::fromData($data);
+        $basic->addSource('img-src', 'ytimg.com');
+
+        $tempfile = tempnam(sys_get_temp_dir(), '');
+
+        $basic->saveSnippet(
+            $tempfile,
+            CSPBuilder::FORMAT_NGINX,
+            function  ($output) {
+                return \str_replace('ytimg', 'foo', $output);
+            }  
+        );
+
+        $this->assertStringContainsString(
+            "img-src 'self' https://foo.com",
+            \file_get_contents($tempfile)
+        );
+    }
+
+    public function testSaveSnippetWithoutHookBeforeSave()
+    {
+        $data = \file_get_contents(__DIR__ . '/vectors/basic-csp.json');
+
+        $basic = CSPBuilder::fromData($data);
+        $basic->addSource('img-src', 'ytimg.com');
+
+        $tempfile = tempnam(sys_get_temp_dir(), '');
+
+        $basic->saveSnippet(
+            $tempfile,
+            CSPBuilder::FORMAT_NGINX
+        );
+
+        $this->assertStringContainsString(
+            "img-src 'self' https://ytimg.com",
+            \file_get_contents($tempfile)
+        );
+    }
+
 }
