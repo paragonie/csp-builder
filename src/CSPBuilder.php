@@ -514,8 +514,8 @@ class CSPBuilder
             default:
                 throw new \Exception('Unknown format: ' . $format);
         }
-        
-        if ($hookBeforeSave !== null ) {
+
+        if ($hookBeforeSave !== null) {
             $output = $hookBeforeSave($output);
         }
 
