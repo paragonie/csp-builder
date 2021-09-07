@@ -277,7 +277,7 @@ class CSPBuilder
     }
 
     /**
-     * Factory method - create a new CSPBuilder object from a JSON data
+     * Factory method - create a new CSPBuilder object from JSON data
      *
      * @param string $data
      * @return self
@@ -998,5 +998,32 @@ class CSPBuilder
         $this->httpsTransformOnHttpsConnections = true;
 
         return $this;
+    }
+
+    /**
+     * Export the policies object as a JSON string
+     *
+     * @return string
+     */
+    public function exportPolicies(): string
+    {
+        return json_encode($this->policies, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Save the configured policies to a JSON file.
+     *
+     * @param string $filePath
+     * @return bool
+     */
+    public function saveToFile(string $filePath): bool
+    {
+        if (!is_writable($filePath)) {
+            throw new \RuntimeException('Cannot write to ' . $filePath);
+        }
+        return file_put_contents(
+            $filePath,
+            $this->exportPolicies()
+        ) !== false;
     }
 }
