@@ -7,26 +7,25 @@ use Psr\Http\Message\MessageInterface;
 use Exception;
 use RuntimeException;
 use TypeError;
-use function
-    array_keys,
-    file_exists,
-    file_get_contents,
-    file_put_contents,
-    filter_var,
-    hash,
-    header,
-    headers_sent,
-    implode,
-    in_array,
-    is_array,
-    is_string,
-    json_encode,
-    json_decode,
-    preg_replace,
-    random_bytes,
-    rtrim,
-    str_replace,
-    strpos;
+use function array_keys;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function filter_var;
+use function hash;
+use function header;
+use function headers_sent;
+use function implode;
+use function in_array;
+use function is_array;
+use function is_string;
+use function json_encode;
+use function json_decode;
+use function preg_replace;
+use function random_bytes;
+use function rtrim;
+use function str_replace;
+use function strpos;
 
 /**
  * Class CSPBuilder
@@ -763,6 +762,23 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow unsafe-hashes within a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws Exception
+     */
+    public function setAllowUnsafeHashes(string $directive = '', bool $allow = false): self
+    {
+        if (!in_array($directive, self::$directives)) {
+            throw new Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-hashes'] = $allow;
+        return $this;
+    }
+
+    /**
      * @see CSPBuilder::setAllowUnsafeInline()
      *
      * @param string $directive
@@ -930,6 +946,9 @@ class CSPBuilder
             }
         }
 
+        if (!empty($policies['unsafe-inline'])) {
+            $ret .= "'unsafe-hashes' ";
+        }
         if (!empty($policies['unsafe-inline'])) {
             $ret .= "'unsafe-inline' ";
         }
