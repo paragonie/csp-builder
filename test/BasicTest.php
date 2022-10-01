@@ -222,6 +222,19 @@ class BasicTest extends TestCase
     }
 
     /**
+     * @covers CSPBuilder::setAllowUnsafeHashes()
+     * @throws \Exception
+     */
+    public function testAllowUnsafeHashes()
+    {
+        $csp = new CSPBuilder();
+        $csp->setAllowUnsafeHashes('script-src', true);
+        $compiled = $csp->compile();
+
+        $this->assertStringContainsString("'unsafe-hashes'", $compiled);
+    }
+
+    /**
      * @covers CSPBuilder::setAllowUnsafeInline()
      * @throws \Exception
      */

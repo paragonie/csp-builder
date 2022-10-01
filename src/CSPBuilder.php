@@ -946,7 +946,7 @@ class CSPBuilder
             }
         }
 
-        if (!empty($policies['unsafe-inline'])) {
+        if (!empty($policies['unsafe-hashes'])) {
             $ret .= "'unsafe-hashes' ";
         }
         if (!empty($policies['unsafe-inline'])) {
