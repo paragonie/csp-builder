@@ -31,6 +31,7 @@
     },
     "require": {
         "php": "^7.1|^8",
+        "ext-json": "*",
         "paragonie/constant_time_encoding": "^2",
         "psr/http-message": "^1"
     },
