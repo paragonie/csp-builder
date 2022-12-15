@@ -29,6 +29,11 @@
             "ParagonIE\\CSPBuilder\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "ParagonIE\\CSPBuilderTest\\": "test"
+        }
+    },
     "require": {
         "php": "^7.1|^8",
         "ext-json": "*",

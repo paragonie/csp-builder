@@ -137,7 +137,7 @@ class CSPBuilder
             if (!is_string($this->policies['report-uri'])) {
                 throw new TypeError('report-uri policy somehow not a string');
             }
-            $compiled [] = 'report-uri ' . $this->policies['report-uri'] . '; ';
+            $compiled [] = 'report-uri ' . $this->enc($this->policies['report-uri']) . '; ';
         }
         if (!empty($this->policies['report-to'])) {
             if (!is_string($this->policies['report-to'])) {
@@ -863,16 +863,16 @@ class CSPBuilder
             if ($directive === 'plugin-types') {
                 return '';
             } elseif ($directive === 'sandbox') {
-                return $directive.'; ';
+                return $this->enc($directive) . '; ';
             }
             return $directive." 'none'; ";
         }
         /** @var array<array-key, mixed> $policies */
 
-        $ret = $directive.' ';
+        $ret = $this->enc($directive) . ' ';
         if ($directive === 'plugin-types') {
             // Expects MIME types, not URLs
-            return $ret . implode(' ', $policies['allow']).'; ';
+            return $ret . $this->enc(implode(' ', $policies['allow']), 'mime').'; ';
         }
         if (!empty($policies['self'])) {
             $ret .= "'self' ";
@@ -1007,6 +1007,28 @@ class CSPBuilder
                 : 'X-Webkit-CSP';
         }
         return $return;
+    }
+
+    /**
+     * @param string $piece
+     * @param string $type
+     * @return string
+     */
+    protected function enc(string $piece, string $type = 'default'): string
+    {
+        switch ($type) {
+            case 'mime':
+                return preg_replace('#^[a-z0-9\-/]+#', '', strtolower($piece));
+            case 'url':
+                return urlencode($piece);
+            default:
+                // Don't inject
+                return str_replace(
+                    [';', "\r", "\n", ':'],
+                    ['%3B', '%0D', '%0A', '%3A'],
+                    $piece
+                );
+        }
     }
 
     /**
