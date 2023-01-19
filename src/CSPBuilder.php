@@ -137,7 +137,7 @@ class CSPBuilder
             if (!is_string($this->policies['report-uri'])) {
                 throw new TypeError('report-uri policy somehow not a string');
             }
-            $compiled [] = 'report-uri ' . $this->enc($this->policies['report-uri']) . '; ';
+            $compiled [] = 'report-uri ' . $this->enc($this->policies['report-uri'], 'url') . '; ';
         }
         if (!empty($this->policies['report-to'])) {
             if (!is_string($this->policies['report-to'])) {
