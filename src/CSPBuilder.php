@@ -149,7 +149,7 @@ class CSPBuilder
             $compiled []= 'upgrade-insecure-requests';
         }
 
-        $this->compiled = implode('', $compiled);
+        $this->compiled = rtrim(implode('', $compiled), '; ');
         $this->needsCompile = false;
         return $this->compiled;
     }
