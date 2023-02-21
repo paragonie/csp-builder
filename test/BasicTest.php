@@ -254,6 +254,10 @@ class BasicTest extends TestCase
     public function testNonce()
     {
         $csp = new CSPBuilder();
+
+        $this->assertEmpty($csp->nonce('script-src'));
+        $this->assertEmpty($csp->nonce('style-src'));
+
         $csp->setSelfAllowed('script-src', true);
         $csp->setSelfAllowed('style-src', true);
 
