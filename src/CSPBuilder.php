@@ -347,6 +347,70 @@ class CSPBuilder
     }
 
     /**
+     * Factory method - create a new CSPBuilder object from an existing CSP header
+     *
+     * @param string $headre
+     * @return self
+     * @throws Exception
+     */
+    public static function fromHeader(string $header = ''): self
+    {
+        $csp = new CSPBuilder();
+
+        $directives = explode(';', $header);
+
+        foreach ($directives as $directive) {
+            [$name, $values] = explode(' ', trim($directive), 2) + [null, null];
+
+            if (null === $name) {
+                continue;
+            }
+
+            if ('upgrade-insecure-requests' === $name) {
+                $csp->addDirective('upgrade-insecure-requests');
+
+                continue;
+            }
+
+            if (null === $values) {
+                continue;
+            }
+
+            foreach (explode(' ', $values) as $value) {
+                if ('report-to' === $name) {
+                    $csp->setReportTo($value);
+                } elseif ('report-uri' === $name) {
+                    $csp->setReportUri($value);
+                } elseif ('require-sri-for' === $name) {
+                    $csp->requireSRIFor($value);
+                } elseif ('plugin-types' === $name) {
+                    $csp->allowPluginType($value);
+                } else {
+                    switch ($value) {
+                        case "'none'": $csp->addDirective($name, false); break;
+                        case "'self'": $csp->setSelfAllowed($name, true); break;
+                        case 'blob:': $csp->setBlobAllowed($name, true); break;
+                        case 'data:': $csp->setDataAllowed($name, true); break;
+                        case 'filesystem:': $csp->setFileSystemAllowed($name, true); break;
+                        case 'https:': $csp->setHttpsAllowed($name, true); break;
+                        case 'mediastream:': $csp->setMediaStreamAllowed($name, true); break;
+                        case "'report-sample'": $csp->setReportSample($name, true); break;
+                        case "'strict-dynamic'": $csp->setStrictDynamic($name, true); break;
+                        case "'unsafe-eval'": $csp->setAllowUnsafeEval($name, true); break;
+                        case "'unsafe-hashes'": $csp->setAllowUnsafeHashes($name, true); break;
+                        case "'unsafe-inline'": $csp->setAllowUnsafeInline($name, true); break;
+                        case "'unsafe-hashed-attributes'": $csp->setAllowUnsafeHashedAttributes('script-src', true); break;
+
+                        default: $csp->addSource($name, $value);
+                    }
+                }
+            }
+        }
+
+        return $csp;
+    }
+
+    /**
      * Get the formatted CSP header
      *
      * @return string
@@ -779,6 +843,23 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow unsafe-hashed-attributes within a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws Exception
+     */
+    public function setAllowUnsafeHashedAttributes(string $directive = '', bool $allow = false): self
+    {
+        if (!in_array($directive, self::$directives)) {
+            throw new Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-hashed-attributes'] = $allow;
+        return $this;
+    }
+
+    /**
      * @see CSPBuilder::setAllowUnsafeInline()
      *
      * @param string $directive
@@ -872,7 +953,7 @@ class CSPBuilder
         $ret = $this->enc($directive) . ' ';
         if ($directive === 'plugin-types') {
             // Expects MIME types, not URLs
-            return $ret . $this->enc(implode(' ', $policies['allow']), 'mime').'; ';
+            return $ret . $this->enc(implode(' ', $policies['types']), 'mime').'; ';
         }
         if (!empty($policies['self'])) {
             $ret .= "'self' ";

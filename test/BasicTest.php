@@ -334,4 +334,15 @@ class BasicTest extends TestCase
         );
     }
 
+    /**
+     * @covers \ParagonIE\CSPBuilder\CSPBuilder
+     */
+    public function testUnsafeHashedAttributes()
+    {
+        $csp = new CSPBuilder();
+        $csp->setAllowUnsafeHashedAttributes('script-src', true);
+        $compiled = $csp->compile();
+        
+        $this->assertStringContainsString("'unsafe-hashed-attributes'", $compiled);
+    }
 }
