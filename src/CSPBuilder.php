@@ -614,6 +614,23 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow unsafe-hashed-attributes within a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws Exception
+     */
+    public function setAllowUnsafeHashedAttributes(string $directive = '', bool $allow = false): self
+    {
+        if (!in_array($directive, self::$directives)) {
+            throw new Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-hashed-attributes'] = $allow;
+        return $this;
+    }
+
+    /**
      * Allow/disallow blob: URIs for a given directive
      *
      * @param string $directive

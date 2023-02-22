@@ -334,4 +334,16 @@ class BasicTest extends TestCase
         );
     }
 
+    /**
+     * @covers CSPBuilder::setAllowUnsafeEval()
+     * @throws \Exception
+     */
+    public function testAllowUnsafeHashedAttributes()
+    {
+        $csp = new CSPBuilder();
+        $csp->setAllowUnsafeHashedAttributes('script-src', true);
+        $compiled = $csp->compile();
+
+        $this->assertStringContainsString("'unsafe-hashed-attributes'", $compiled);
+    }
 }
