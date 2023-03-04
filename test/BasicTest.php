@@ -334,4 +334,18 @@ class BasicTest extends TestCase
         );
     }
 
+    /**
+     * @covers CSPBuilder::allowPluginType()
+     * @throws \Exception
+     */
+    public function testAllowPluginType()
+    {
+        $csp = new CSPBuilder();
+        $csp->allowPluginType('application/x-java-applet');
+        $csp->allowPluginType('something/$&§invalid');
+        $compiled = $csp->compile();
+
+        $this->assertStringContainsString('plugin-types application/x-java-applet', $compiled);
+        $this->assertStringNotContainsString('something', $compiled);
+    }
 }
