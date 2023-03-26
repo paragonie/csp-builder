@@ -73,6 +73,23 @@ class BasicTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testNoTrailingSemicolon()
+    {
+        $csp = (new CSPBuilder())
+            ->setSelfAllowed('default-src', true)
+            ->addSource('img-src', 'ytimg.com')
+            ->disableOldBrowserSupport()
+        ;
+
+        $this->assertEquals(
+            "default-src 'self'; img-src ytimg.com",
+            $csp->getCompiledHeader()
+        );
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testHash()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
