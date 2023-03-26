@@ -273,19 +273,19 @@ class BasicTest extends TestCase
         $csp->setDirective('sandbox');
         $compiled = $csp->compile();
 
-        $this->assertEquals($compiled, 'sandbox; ');
+        $this->assertEquals($compiled, 'sandbox');
 
         $csp->addSource('sandbox', 'allow-scripts');
         $compiled = $csp->compile();
 
-        $this->assertEquals($compiled, 'sandbox allow-scripts; ');
+        $this->assertEquals($compiled, 'sandbox allow-scripts');
 
         $csp->setDirective('sandbox', [
             'allow' => ['allow-popups-to-escape-sandbox'],
         ]);
         $compiled = $csp->compile();
 
-        $this->assertEquals($compiled, 'sandbox allow-popups-to-escape-sandbox; ');
+        $this->assertEquals($compiled, 'sandbox allow-popups-to-escape-sandbox');
     }
 
     /**

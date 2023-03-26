@@ -137,7 +137,7 @@ class CSPBuilder
             if (!is_string($this->policies['report-uri'])) {
                 throw new TypeError('report-uri policy somehow not a string');
             }
-            $compiled [] = 'report-uri ' . $this->policies['report-uri'] . '; ';
+            $compiled [] = 'report-uri ' . $this->enc($this->policies['report-uri'], 'report-uri') . '; ';
         }
         if (!empty($this->policies['report-to'])) {
             if (!is_string($this->policies['report-to'])) {
@@ -1035,6 +1035,8 @@ class CSPBuilder
     protected function enc(string $piece, string $type = 'default'): string
     {
         switch ($type) {
+            case 'report-uri':
+                return str_replace(["\r", "\n", ';'], '', $piece);
             case 'mime':
                 if (preg_match('#^([a-z0-9\-/]+)#', $piece, $matches)) {
                     return $matches[1];
