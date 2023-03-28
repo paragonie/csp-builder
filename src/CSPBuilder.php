@@ -2,6 +2,9 @@
 declare(strict_types=1);
 namespace ParagonIE\CSPBuilder;
 
+use Opis\JsonSchema\Exceptions\SchemaException;
+use Opis\JsonSchema\Helper;
+use Opis\JsonSchema\Validator;
 use ParagonIE\ConstantTime\Base64;
 use Psr\Http\Message\MessageInterface;
 use Exception;
@@ -55,6 +58,21 @@ class CSPBuilder
      * @var string
      */
     private $compiled = '';
+
+    /**
+     * @var array
+     */
+    private $reportEndpoints = [];
+
+    /**
+     * @var string
+     */
+    private $compiledEndpoints = '';
+
+    /**
+     * @var bool
+     */
+    private $needsCompileEndpoints = true;
 
     /**
      * @var bool
@@ -141,13 +159,14 @@ class CSPBuilder
             if (!is_string($this->policies['report-uri'])) {
                 throw new TypeError('report-uri policy somehow not a string');
             }
-            $compiled [] = 'report-uri ' . $this->enc($this->policies['report-uri'], 'report-uri') . '; ';
+            $compiled [] = sprintf('report-uri %s; ', $this->enc($this->policies['report-uri']), 'report-uri');
         }
         if (!empty($this->policies['report-to'])) {
             if (!is_string($this->policies['report-to'])) {
                 throw new TypeError('report-to policy somehow not a string');
             }
-            $compiled []= 'report-to ' . $this->policies['report-to'] . '; ';
+            // @todo validate this `report-to` target, is in the `report-to` header?
+            $compiled[] = sprintf('report-to %s; ', $this->policies['report-to']);
         }
         if (!empty($this->policies['upgrade-insecure-requests'])) {
             $compiled []= 'upgrade-insecure-requests';
@@ -155,7 +174,34 @@ class CSPBuilder
 
         $this->compiled = rtrim(implode('', $compiled), '; ');
         $this->needsCompile = false;
+
         return $this->compiled;
+    }
+
+    public function compileReportEndpoints()
+    {
+        if (!empty($this->reportEndpoints) && $this->needsCompileEndpoints) {
+            // If it's a string, it's probably something like `report-to: key=endpoint
+            // Do nothing
+            if (!is_array($this->reportEndpoints)) {
+                throw new TypeError('Report endpoints is not an array');
+            }
+            if (is_array($this->reportEndpoints)) {
+                $jsonValidator = new Validator();
+                $reportTo = [];
+                $schema = file_get_contents(__DIR__ . '/../schema/reportto.json');
+                foreach ($this->reportEndpoints as $reportEndpoint) {
+                    $reportEndpointAsJSON = \Opis\JsonSchema\Helper::toJSON($reportEndpoint);
+                    $isValid = $jsonValidator->validate($reportEndpointAsJSON, $schema);
+                    if ($isValid->isValid()) {
+                        $reportTo[] = json_encode($reportEndpointAsJSON);
+                    }
+
+                }
+                $this->compiledEndpoints = rtrim(implode(',', $reportTo));
+            }
+            $this->needsCompileEndpoints = false;
+        }
     }
 
     /**
@@ -256,6 +302,17 @@ class CSPBuilder
             $this->policies[$key] = $value;
         }
         return $this;
+    }
+
+
+    /**
+     * @param array|string $reportEndpoint
+     * @return void
+     */
+    public function addReportEndpoints(array|string $reportEndpoint): void
+    {
+        $this->needsCompileEndpoints = true;
+        $this->reportEndpoints[] = Helper::toJSON($reportEndpoint);
     }
 
     /**
@@ -361,6 +418,20 @@ class CSPBuilder
     }
 
     /**
+     * Get the formatted report-to header
+     *
+     * @return string
+     */
+    public function getCompiledReportEndpointsHeader(): string
+    {
+        if ($this->needsCompileEndpoints) {
+            $this->compileReportEndpoints();
+        }
+
+        return $this->compiledEndpoints;
+    }
+
+    /**
      * Get an associative array of headers to return.
      *
      * @param bool $legacy
@@ -371,7 +442,14 @@ class CSPBuilder
         if ($this->needsCompile) {
             $this->compile();
         }
-        $return = [];
+        if ($this->needsCompileEndpoints) {
+            $this->compileReportEndpoints();
+        }
+        if (!empty($this->compiledEndpoints)) {
+            $return = [
+                'Report-To' => $this->compiledEndpoints
+            ];
+        }
         foreach ($this->getHeaderKeys($legacy) as $key) {
             $return[(string) $key] = $this->compiled;
         }
@@ -391,6 +469,14 @@ class CSPBuilder
             ];
         }
         return $headers;
+    }
+
+    /**
+     * @return array|string
+     */
+    public function getReportEndpoints(): array
+    {
+        return $this->reportEndpoints;
     }
 
     /**
@@ -433,6 +519,9 @@ class CSPBuilder
         if ($this->needsCompile) {
             $this->compile();
         }
+        if ($this->needsCompileEndpoints) {
+            $this->compileReportEndpoints();
+        }
         foreach ($this->getRequireHeaders() as $header) {
             list ($key, $value) = $header;
             $message = $message->withAddedHeader($key, $value);
@@ -440,6 +529,10 @@ class CSPBuilder
         foreach ($this->getHeaderKeys($legacy) as $key) {
             $message = $message->withAddedHeader($key, $this->compiled);
         }
+        if (!empty($this->compileReportEndpoints())) {
+            $message = $message->withAddedHeader('report-to', $this->reportTo);
+        }
+
         return $message;
     }
 
@@ -514,6 +607,7 @@ class CSPBuilder
     ): bool {
         if ($this->needsCompile) {
             $this->compile();
+            $this->compileReportEndpoints();
         }
 
         // Are we doing a report-only header?
@@ -570,12 +664,18 @@ class CSPBuilder
         if ($this->needsCompile) {
             $this->compile();
         }
+        if ($this->needsCompileEndpoints) {
+            $this->compileReportEndpoints();
+        }
         foreach ($this->getRequireHeaders() as $header) {
             list ($key, $value) = $header;
-            header($key.': '.$value);
+            header(sprintf('%s: %s', $key, $value));
         }
         foreach ($this->getHeaderKeys($legacy) as $key) {
-            header($key.': '.$this->compiled);
+            header(sprintf('%s: %s', $key, $this->compiled));
+        }
+        if (!empty($this->compiledEndpoints)) {
+            header(sprintf('report-to: %s', $this->compiledEndpoints));
         }
         return true;
     }
@@ -698,6 +798,31 @@ class CSPBuilder
         return $this;
     }
 
+    /**
+     * @param array|string $reportEndpoints
+     * @return void
+     */
+    public function setReportEndpoints(array|string $reportEndpoints): void
+    {
+        $this->needsCompileEndpoints = true;
+        $toJSON = Helper::toJSON($reportEndpoints);
+        // If there's only one, wrap it in an array, so more can be added
+        $toJSON = is_array($toJSON) ? $toJSON : [$toJSON];
+        $this->reportEndpoints = $toJSON;
+    }
+
+
+    public function removeReportEndpoint(string $key)
+    {
+        foreach ($this->reportEndpoints as $idx => $endpoint) {
+            if ($endpoint->group === $key) {
+                unset($this->reportEndpoints[$idx]);
+                // Reset the array keys
+                $this->reportEndpoints = array_values($this->reportEndpoints);
+                break;
+            }
+        }
+    }
     /**
      * Allow/disallow filesystem: URIs for a given directive
      *
@@ -855,10 +980,10 @@ class CSPBuilder
     /**
      * Set the report-to directive to the desired string.
      *
-     * @param string $policy
+     * @param string|array $policy
      * @return self
      */
-    public function setReportTo(string $policy = ''): self
+    public function setReportTo($policy = ''): self
     {
         $this->policies['report-to'] = $policy;
         return $this;
