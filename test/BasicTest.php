@@ -122,8 +122,13 @@ class BasicTest extends TestCase
     public function testSourceHttpsConversion()
     {
         /** @var CSPBuilder|MockObject $cspHttp */
-        $cspHttp = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
-            ->disableOriginalConstructor()->getMock();
+        if (PHP_VERSION_ID < 70200) {
+            $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        } else {
+            $cspHttp = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        }
         $cspHttp->method('isHTTPSConnection')->willReturn(false);
 
         $cspHttp->addSource('form', 'http://example.com');
@@ -135,8 +140,13 @@ class BasicTest extends TestCase
         $this->assertStringContainsString('http://another.com', $compiledCspHttp);
 
         /** @var CSPBuilder|MockObject $cspHttps */
-        $cspHttps = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
-            ->disableOriginalConstructor()->getMock();
+        if (PHP_VERSION_ID < 70200) {
+            $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        } else {
+            $cspHttps = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        }
         $cspHttps->method('isHTTPSConnection')->willReturn(true);
 
         $cspHttps->addSource('form', 'http://example.com');
