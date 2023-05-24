@@ -122,7 +122,7 @@ class BasicTest extends TestCase
     public function testSourceHttpsConversion()
     {
         /** @var CSPBuilder|MockObject $cspHttp */
-        $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+        $cspHttp = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
             ->disableOriginalConstructor()->getMock();
         $cspHttp->method('isHTTPSConnection')->willReturn(false);
 
@@ -135,7 +135,7 @@ class BasicTest extends TestCase
         $this->assertStringContainsString('http://another.com', $compiledCspHttp);
 
         /** @var CSPBuilder|MockObject $cspHttps */
-        $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+        $cspHttps = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
             ->disableOriginalConstructor()->getMock();
         $cspHttps->method('isHTTPSConnection')->willReturn(true);
 
