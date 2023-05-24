@@ -90,7 +90,11 @@ class CSPBuilder
         'manifest-src',
         'sandbox',
         'script-src',
+        'script-src-elem',
+        'script-src-attr',
         'style-src',
+        'style-src-elem',
+        'style-src-attr',
         'worker-src'
     ];
 
@@ -209,9 +213,6 @@ class CSPBuilder
             case 'script':
             case 'scripts':
                 $directive = 'script-src';
-                break;
-            case 'script-src-elem':
-            case 'script-src-attr':
                 break;
             case 'style':
             case 'css':

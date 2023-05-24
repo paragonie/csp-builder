@@ -51,8 +51,10 @@
         "unsafe-inline": false,
         "unsafe-eval": false
     },
+    "script-src-attr": [],
     "style-src": {
         "self": true
     },
+    "style-src-attr": [],
     "upgrade-insecure-requests": true
 }
