@@ -52,8 +52,10 @@
         "unsafe-eval": false,
         "unsafe-hashed-attributes": true
     },
+    "script-src-attr": [],
     "style-src": {
         "self": true
     },
+    "style-src-attr": [],
     "upgrade-insecure-requests": true
 }

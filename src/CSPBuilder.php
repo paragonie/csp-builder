@@ -90,7 +90,11 @@ class CSPBuilder
         'manifest-src',
         'sandbox',
         'script-src',
+        'script-src-elem',
+        'script-src-attr',
         'style-src',
+        'style-src-elem',
+        'style-src-attr',
         'worker-src'
     ];
 
@@ -137,7 +141,7 @@ class CSPBuilder
             if (!is_string($this->policies['report-uri'])) {
                 throw new TypeError('report-uri policy somehow not a string');
             }
-            $compiled [] = 'report-uri ' . $this->enc($this->policies['report-uri'], 'url') . '; ';
+            $compiled [] = 'report-uri ' . $this->enc($this->policies['report-uri'], 'report-uri') . '; ';
         }
         if (!empty($this->policies['report-to'])) {
             if (!is_string($this->policies['report-to'])) {
@@ -149,7 +153,7 @@ class CSPBuilder
             $compiled []= 'upgrade-insecure-requests';
         }
 
-        $this->compiled = implode('', $compiled);
+        $this->compiled = rtrim(implode('', $compiled), '; ');
         $this->needsCompile = false;
         return $this->compiled;
     }
@@ -209,9 +213,6 @@ class CSPBuilder
             case 'script':
             case 'scripts':
                 $directive = 'script-src';
-                break;
-            case 'script-src-elem':
-            case 'script-src-attr':
                 break;
             case 'style':
             case 'css':
@@ -678,6 +679,23 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow unsafe-hashed-attributes within a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws Exception
+     */
+    public function setAllowUnsafeHashedAttributes(string $directive = '', bool $allow = false): self
+    {
+        if (!in_array($directive, self::$directives)) {
+            throw new Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['unsafe-hashed-attributes'] = $allow;
+        return $this;
+    }
+
+    /**
      * Allow/disallow blob: URIs for a given directive
      *
      * @param string $directive
@@ -953,7 +971,8 @@ class CSPBuilder
         $ret = $this->enc($directive) . ' ';
         if ($directive === 'plugin-types') {
             // Expects MIME types, not URLs
-            return $ret . $this->enc(implode(' ', $policies['types']), 'mime').'; ';
+            $types = trim($this->enc(implode(' ', $policies['types']), 'mime'));
+            return $types ? $ret . $types . '; ' : '';
         }
         if (!empty($policies['self'])) {
             $ret .= "'self' ";
@@ -1098,8 +1117,13 @@ class CSPBuilder
     protected function enc(string $piece, string $type = 'default'): string
     {
         switch ($type) {
+            case 'report-uri':
+                return str_replace(["\r", "\n", ';'], '', $piece);
             case 'mime':
-                return preg_replace('#^[a-z0-9\-/]+#', '', strtolower($piece));
+                if (preg_match('#^([a-z0-9\-/]+)#', $piece, $matches)) {
+                    return $matches[1];
+                }
+                return '';
             case 'url':
                 return urlencode($piece);
             default:

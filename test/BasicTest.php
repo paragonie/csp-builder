@@ -73,6 +73,23 @@ class BasicTest extends TestCase
     /**
      * @throws \Exception
      */
+    public function testNoTrailingSemicolon()
+    {
+        $csp = (new CSPBuilder())
+            ->setSelfAllowed('default-src', true)
+            ->addSource('img-src', 'ytimg.com')
+            ->disableOldBrowserSupport()
+        ;
+
+        $this->assertEquals(
+            "default-src 'self'; img-src ytimg.com",
+            $csp->getCompiledHeader()
+        );
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testHash()
     {
         $basic = CSPBuilder::fromFile(__DIR__.'/vectors/basic-csp.json');
@@ -105,8 +122,13 @@ class BasicTest extends TestCase
     public function testSourceHttpsConversion()
     {
         /** @var CSPBuilder|MockObject $cspHttp */
-        $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
-            ->disableOriginalConstructor()->getMock();
+        if (PHP_VERSION_ID < 70200) {
+            $cspHttp = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        } else {
+            $cspHttp = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        }
         $cspHttp->method('isHTTPSConnection')->willReturn(false);
 
         $cspHttp->addSource('form', 'http://example.com');
@@ -118,8 +140,13 @@ class BasicTest extends TestCase
         $this->assertStringContainsString('http://another.com', $compiledCspHttp);
 
         /** @var CSPBuilder|MockObject $cspHttps */
-        $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
-            ->disableOriginalConstructor()->getMock();
+        if (PHP_VERSION_ID < 70200) {
+            $cspHttps = $this->getMockBuilder(CSPBuilder::class)->setMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        } else {
+            $cspHttps = $this->getMockBuilder(CSPBuilder::class)->onlyMethods(['isHTTPSConnection'])
+                ->disableOriginalConstructor()->getMock();
+        }
         $cspHttps->method('isHTTPSConnection')->willReturn(true);
 
         $cspHttps->addSource('form', 'http://example.com');
@@ -256,19 +283,19 @@ class BasicTest extends TestCase
         $csp->setDirective('sandbox');
         $compiled = $csp->compile();
 
-        $this->assertEquals($compiled, 'sandbox; ');
+        $this->assertEquals($compiled, 'sandbox');
 
         $csp->addSource('sandbox', 'allow-scripts');
         $compiled = $csp->compile();
 
-        $this->assertEquals($compiled, 'sandbox allow-scripts; ');
+        $this->assertEquals($compiled, 'sandbox allow-scripts');
 
         $csp->setDirective('sandbox', [
             'allow' => ['allow-popups-to-escape-sandbox'],
         ]);
         $compiled = $csp->compile();
 
-        $this->assertEquals($compiled, 'sandbox allow-popups-to-escape-sandbox; ');
+        $this->assertEquals($compiled, 'sandbox allow-popups-to-escape-sandbox');
     }
 
     /**
@@ -335,14 +362,30 @@ class BasicTest extends TestCase
     }
 
     /**
-     * @covers \ParagonIE\CSPBuilder\CSPBuilder
+     * @covers CSPBuilder::setAllowUnsafeEval()
+     * @throws \Exception
      */
-    public function testUnsafeHashedAttributes()
+    public function testAllowUnsafeHashedAttributes()
     {
         $csp = new CSPBuilder();
         $csp->setAllowUnsafeHashedAttributes('script-src', true);
         $compiled = $csp->compile();
-        
+
         $this->assertStringContainsString("'unsafe-hashed-attributes'", $compiled);
+     }
+     
+    /**
+     * @covers CSPBuilder::allowPluginType()
+     * @throws \Exception
+     */
+    public function testAllowPluginType()
+    {
+        $csp = new CSPBuilder();
+        $csp->allowPluginType('application/x-java-applet');
+        $csp->allowPluginType('something/$&§invalid');
+        $compiled = $csp->compile();
+
+        $this->assertStringContainsString('plugin-types application/x-java-applet', $compiled);
+        $this->assertStringNotContainsString('something', $compiled);
     }
 }
