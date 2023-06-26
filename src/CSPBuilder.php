@@ -350,7 +350,7 @@ class CSPBuilder
     /**
      * Factory method - create a new CSPBuilder object from an existing CSP header
      *
-     * @param string $headre
+     * @param string $header
      * @return self
      * @throws Exception
      */

@@ -102,5 +102,9 @@ class ParserTest extends TestCase
             "plugin-types application/x-java-applet",
             "plugin-types application/x-java-applet"
         ];
+        yield [
+            "form-action 'none'; sandbox allow-scripts; style-src-attr 'none'; worker-src https://example.com/",
+            "form-action 'none'; sandbox allow-scripts; style-src-attr 'none'; worker-src https://example.com/"
+        ];
     }
 }
