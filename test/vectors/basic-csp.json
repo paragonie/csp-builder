@@ -49,8 +49,7 @@
         ],
         "self": true,
         "unsafe-inline": false,
-        "unsafe-eval": false,
-        "unsafe-hashed-attributes": true
+        "unsafe-eval": false
     },
     "script-src-attr": [],
     "style-src": {
