@@ -348,6 +348,70 @@ class CSPBuilder
     }
 
     /**
+     * Factory method - create a new CSPBuilder object from an existing CSP header
+     *
+     * @param string $header
+     * @return self
+     * @throws Exception
+     */
+    public static function fromHeader(string $header = ''): self
+    {
+        $csp = new CSPBuilder();
+
+        $directives = explode(';', $header);
+
+        foreach ($directives as $directive) {
+            [$name, $values] = explode(' ', trim($directive), 2) + [null, null];
+
+            if (null === $name) {
+                continue;
+            }
+
+            if ('upgrade-insecure-requests' === $name) {
+                $csp->addDirective('upgrade-insecure-requests');
+
+                continue;
+            }
+
+            if (null === $values) {
+                continue;
+            }
+
+            foreach (explode(' ', $values) as $value) {
+                if ('report-to' === $name) {
+                    $csp->setReportTo($value);
+                } elseif ('report-uri' === $name) {
+                    $csp->setReportUri($value);
+                } elseif ('require-sri-for' === $name) {
+                    $csp->requireSRIFor($value);
+                } elseif ('plugin-types' === $name) {
+                    $csp->allowPluginType($value);
+                } else {
+                    switch ($value) {
+                        case "'none'": $csp->addDirective($name, false); break;
+                        case "'self'": $csp->setSelfAllowed($name, true); break;
+                        case 'blob:': $csp->setBlobAllowed($name, true); break;
+                        case 'data:': $csp->setDataAllowed($name, true); break;
+                        case 'filesystem:': $csp->setFileSystemAllowed($name, true); break;
+                        case 'https:': $csp->setHttpsAllowed($name, true); break;
+                        case 'mediastream:': $csp->setMediaStreamAllowed($name, true); break;
+                        case "'report-sample'": $csp->setReportSample($name, true); break;
+                        case "'strict-dynamic'": $csp->setStrictDynamic($name, true); break;
+                        case "'unsafe-eval'": $csp->setAllowUnsafeEval($name, true); break;
+                        case "'unsafe-hashes'": $csp->setAllowUnsafeHashes($name, true); break;
+                        case "'unsafe-inline'": $csp->setAllowUnsafeInline($name, true); break;
+                        case "'unsafe-hashed-attributes'": $csp->setAllowUnsafeHashedAttributes('script-src', true); break;
+
+                        default: $csp->addSource($name, $value);
+                    }
+                }
+            }
+        }
+
+        return $csp;
+    }
+
+    /**
      * Get the formatted CSP header
      *
      * @return string
