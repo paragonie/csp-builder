@@ -275,6 +275,37 @@ class BasicTest extends TestCase
     }
 
     /**
+     * @covers CSPBuilder::nonce()
+     * @throws \Exception
+     */
+    public function testNonce()
+    {
+        $csp = new CSPBuilder();
+
+        $this->assertEmpty($csp->nonce('script-src'));
+        $this->assertEmpty($csp->nonce('style-src'));
+
+        $csp->setSelfAllowed('script-src', true);
+        $csp->setSelfAllowed('style-src', true);
+
+        $this->assertNotEmpty($csp->nonce('script-src'));
+        $this->assertNotEmpty($csp->nonce('style-src'));
+    }
+
+    /**
+     * @covers CSPBuilder::nonce()
+     * @throws \Exception
+     */
+    public function testNonceWithDefaultSrc()
+    {
+        $csp = new CSPBuilder();
+        $csp->setSelfAllowed('default-src', true);
+
+        $this->assertNotEmpty($csp->nonce('script-src'));
+        $this->assertNotEmpty($csp->nonce('style-src'));
+    }
+
+    /**
      * @covers \ParagonIE\CSPBuilder\CSPBuilder
      */
     public function testSandbox()
