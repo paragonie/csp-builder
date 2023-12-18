@@ -182,6 +182,7 @@ class CSPBuilder
     }
 
     /**
+     * @psalm-suppress DocblockTypeContradiction
      * @psalm-suppress TypeDoesNotContainType
      */
     public function compileReportEndpoints(): string
