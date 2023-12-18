@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/ReportTo",
+  "definitions": {
+    "ReportTo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "group": {
+          "type": "string"
+        },
+        "max_age": {
+          "type": "integer"
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Endpoint"
+          }
+        },
+        "include_subdomains": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "endpoints",
+        "group",
+        "max_age"
+      ],
+      "title": "ReportTo"
+    },
+    "Endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "qt-uri-protocols": [
+            "https"
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "Endpoint"
+    }
+  }
+}
