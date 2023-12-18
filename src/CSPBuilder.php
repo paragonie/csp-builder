@@ -159,7 +159,10 @@ class CSPBuilder
             if (!is_string($this->policies['report-uri'])) {
                 throw new TypeError('report-uri policy somehow not a string');
             }
-            $compiled [] = sprintf('report-uri %s; ', $this->enc($this->policies['report-uri']), 'report-uri');
+            $compiled []= sprintf(
+                'report-uri %s; ',
+                $this->enc($this->policies['report-uri'], 'report-uri')
+            );
         }
         if (!empty($this->policies['report-to'])) {
             if (!is_string($this->policies['report-to'])) {
@@ -178,7 +181,10 @@ class CSPBuilder
         return $this->compiled;
     }
 
-    public function compileReportEndpoints()
+    /**
+     * @psalm-suppress TypeDoesNotContainType
+     */
+    public function compileReportEndpoints(): string
     {
         if (!empty($this->reportEndpoints) && $this->needsCompileEndpoints) {
             // If it's a string, it's probably something like `report-to: key=endpoint
@@ -186,22 +192,21 @@ class CSPBuilder
             if (!is_array($this->reportEndpoints)) {
                 throw new TypeError('Report endpoints is not an array');
             }
-            if (is_array($this->reportEndpoints)) {
-                $jsonValidator = new Validator();
-                $reportTo = [];
-                $schema = file_get_contents(__DIR__ . '/../schema/reportto.json');
-                foreach ($this->reportEndpoints as $reportEndpoint) {
-                    $reportEndpointAsJSON = \Opis\JsonSchema\Helper::toJSON($reportEndpoint);
-                    $isValid = $jsonValidator->validate($reportEndpointAsJSON, $schema);
-                    if ($isValid->isValid()) {
-                        $reportTo[] = json_encode($reportEndpointAsJSON);
-                    }
 
+            $jsonValidator = new Validator();
+            $reportTo = [];
+            $schema = file_get_contents(__DIR__ . '/../schema/reportto.json');
+            foreach ($this->reportEndpoints as $reportEndpoint) {
+                $reportEndpointAsJSON = \Opis\JsonSchema\Helper::toJSON($reportEndpoint);
+                $isValid = $jsonValidator->validate($reportEndpointAsJSON, $schema);
+                if ($isValid->isValid()) {
+                    $reportTo[] = json_encode($reportEndpointAsJSON);
                 }
-                $this->compiledEndpoints = rtrim(implode(',', $reportTo));
             }
+            $this->compiledEndpoints = rtrim(implode(',', $reportTo));
             $this->needsCompileEndpoints = false;
         }
+        return $this->compiledEndpoints;
     }
 
     /**
@@ -317,7 +322,7 @@ class CSPBuilder
      * @param array|string $reportEndpoint
      * @return void
      */
-    public function addReportEndpoints(array|string $reportEndpoint): void
+    public function addReportEndpoints($reportEndpoint): void
     {
         $this->needsCompileEndpoints = true;
         $this->reportEndpoints[] = Helper::toJSON($reportEndpoint);
@@ -418,6 +423,8 @@ class CSPBuilder
      * @param string $header
      * @return self
      * @throws Exception
+     *
+     * @psalm-suppress DocblockTypeContradiction
      */
     public static function fromHeader(string $header = ''): self
     {
@@ -428,7 +435,7 @@ class CSPBuilder
         foreach ($directives as $directive) {
             [$name, $values] = explode(' ', trim($directive), 2) + [null, null];
 
-            if (null === $name) {
+            if (is_null($name)) {
                 continue;
             }
 
@@ -511,6 +518,7 @@ class CSPBuilder
      */
     public function getHeaderArray(bool $legacy = true): array
     {
+        $return = [];
         if ($this->needsCompile) {
             $this->compile();
         }
@@ -544,7 +552,7 @@ class CSPBuilder
     }
 
     /**
-     * @return array|string
+     * @return array
      */
     public function getReportEndpoints(): array
     {
@@ -602,7 +610,7 @@ class CSPBuilder
             $message = $message->withAddedHeader($key, $this->compiled);
         }
         if (!empty($this->compileReportEndpoints())) {
-            $message = $message->withAddedHeader('report-to', $this->reportTo);
+            $message = $message->withAddedHeader('report-to', $this->compiledEndpoints);
         }
 
         return $message;
@@ -874,7 +882,7 @@ class CSPBuilder
      * @param array|string $reportEndpoints
      * @return void
      */
-    public function setReportEndpoints(array|string $reportEndpoints): void
+    public function setReportEndpoints($reportEndpoints): void
     {
         $this->needsCompileEndpoints = true;
         $toJSON = Helper::toJSON($reportEndpoints);
@@ -883,8 +891,11 @@ class CSPBuilder
         $this->reportEndpoints = $toJSON;
     }
 
-
-    public function removeReportEndpoint(string $key)
+    /**
+     * @param string $key
+     * @return void
+     */
+    public function removeReportEndpoint(string $key): void
     {
         foreach ($this->reportEndpoints as $idx => $endpoint) {
             if ($endpoint->group === $key) {
