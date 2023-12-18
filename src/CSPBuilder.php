@@ -171,6 +171,14 @@ class CSPBuilder
         $this->needsCompile = true;
         switch ($directive) {
             case 'child':
+            case 'child-src':
+                if ($this->supportOldBrowsers) {
+                    $this->policies['child-src']['allow'][] = $path;
+                    $this->policies['frame-src']['allow'][] = $path;
+                    return $this;
+                }
+                $directive = 'child-src';
+                break;
             case 'frame':
             case 'frame-src':
                 if ($this->supportOldBrowsers) {
@@ -178,7 +186,7 @@ class CSPBuilder
                     $this->policies['frame-src']['allow'][] = $path;
                     return $this;
                 }
-                $directive = 'child-src';
+                $directive = 'frame-src';
                 break;
             case 'connect':
             case 'socket':
