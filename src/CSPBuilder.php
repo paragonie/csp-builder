@@ -1109,7 +1109,7 @@ class CSPBuilder
         if (!empty($policies['allow'])) {
             /** @var array<array-key, string> $allowedPolicies */
             $allowedPolicies = $policies['allow'];
-            foreach ($allowedPolicies as $url) {
+            foreach (array_unique($allowedPolicies) as $url) {
                 /** @var string|bool $url */
                 $url = filter_var($url, FILTER_SANITIZE_URL);
                 if (is_string($url)) {
