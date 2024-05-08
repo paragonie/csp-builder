@@ -289,8 +289,10 @@ class CSPBuilder
         if (!isset($this->policies[$directive]['allow'])) {
             $this->policies[$directive]['allow'] = [];
         }
-        if (!in_array($path, $this->policies[$directive]['allow'], true)) {
-            $this->policies[$directive]['allow'][] = $path;
+        if (is_array($this->policies[$directive]['allow'])) {
+            if (!in_array($path, $this->policies[$directive]['allow'], true)) {
+                $this->policies[$directive]['allow'][] = $path;
+            }
         }
         return $this;
     }
@@ -1268,6 +1270,7 @@ class CSPBuilder
      * Is this user currently connected over HTTPS?
      *
      * @return bool
+     * @psalm-suppress RiskyTruthyFalsyComparison
      */
     protected function isHTTPSConnection(): bool
     {
