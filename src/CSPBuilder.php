@@ -686,7 +686,7 @@ class CSPBuilder
     public function saveSnippet(
         string $outputFile,
         string $format = self::FORMAT_NGINX,
-        callable $hookBeforeSave = null
+        ?callable $hookBeforeSave = null
     ): bool {
         if ($this->needsCompile) {
             $this->compile();
