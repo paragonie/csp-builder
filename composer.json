@@ -37,7 +37,7 @@
     "require": {
         "php": "^7.4|^8",
         "ext-json": "*",
-        "paragonie/constant_time_encoding": "^2",
+        "paragonie/constant_time_encoding": "^2|^3",
         "psr/http-message": "^1|^2",
         "opis/json-schema": "^2.3"
     },
