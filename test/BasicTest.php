@@ -249,6 +249,19 @@ class BasicTest extends TestCase
     }
 
     /**
+     * @covers CSPBuilder::setAllowWasmUnsafeEval()
+     * @throws \Exception
+     */
+    public function testAllowWasmUnsafeEval()
+    {
+        $csp = new CSPBuilder();
+        $csp->setAllowWasmUnsafeEval('script-src', true);
+        $compiled = $csp->compile();
+
+        $this->assertStringContainsString("'wasm-unsafe-eval'", $compiled);
+    }
+
+    /**
      * @covers CSPBuilder::setAllowUnsafeHashes()
      * @throws \Exception
      */

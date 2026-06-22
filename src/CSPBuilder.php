@@ -484,7 +484,7 @@ class CSPBuilder
                         case "'unsafe-hashes'": $csp->setAllowUnsafeHashes($name, true); break;
                         case "'unsafe-inline'": $csp->setAllowUnsafeInline($name, true); break;
                         case "'unsafe-hashed-attributes'": $csp->setAllowUnsafeHashedAttributes('script-src', true); break;
-
+                        case "'wasm-unsafe-eval'": $csp->setAllowWasmUnsafeEval($name, true); break;
                         default: $csp->addSource($name, $value);
                     }
                 }
@@ -789,6 +789,23 @@ class CSPBuilder
     }
 
     /**
+     * Allow/disallow wasm-unsafe-eval within a given directive.
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws Exception
+     */
+    public function setAllowWasmUnsafeEval(string $directive = '', bool $allow = false): self
+    {
+        if (!in_array($directive, self::$directives)) {
+            throw new Exception('Directive ' . $directive . ' does not exist');
+        }
+        $this->policies[$directive]['wasm-unsafe-eval'] = $allow;
+        return $this;
+    }
+
+    /**
      * Allow/disallow unsafe-inline within a given directive.
      *
      * @param string $directive
@@ -999,6 +1016,19 @@ class CSPBuilder
     }
 
     /**
+     * @see CSPBuilder::setWasmUnsafeEvalAllowed()
+     *
+     * @param string $directive
+     * @param bool $allow
+     * @return self
+     * @throws Exception
+     */
+    public function setWasmUnsafeEvalAllowed(string $directive = '', bool $allow = false): self
+    {
+        return $this->setAllowUnsafeEval($directive, $allow);
+    }
+
+    /**
      * Allow/disallow unsafe-hashes within a given directive.
      *
      * @param string $directive
@@ -1192,6 +1222,9 @@ class CSPBuilder
         }
         if (!empty($policies['unsafe-eval'])) {
             $ret .= "'unsafe-eval' ";
+        }
+        if (!empty($policies['wasm-unsafe-eval'])) {
+            $ret .= "'wasm-unsafe-eval' ";
         }
         if (!empty($policies['blob'])) {
             $ret .= "blob: ";
