@@ -24,6 +24,7 @@ jobs:
       - name: Install Composer dependencies
         uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
         with:
+          dependency-versions: lowest
           composer-options: --no-dev
 
       - name: Static Analysis
