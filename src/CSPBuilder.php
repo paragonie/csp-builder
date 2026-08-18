@@ -33,6 +33,7 @@ use function strpos;
 /**
  * Class CSPBuilder
  * @package ParagonIE\CSPBuilder
+ * @psalm-api
  */
 class CSPBuilder
 {
@@ -585,10 +586,12 @@ class CSPBuilder
     ): self {
         $ruleKeys = array_keys($this->policies);
         if (in_array($directive, $ruleKeys)) {
+            $digest = hash($algorithm, $script, true);
+            if (!is_string($digest)) {
+                throw new RuntimeException('Hashing failed');
+            }
             $this->policies[$directive]['hashes'] []= [
-                $algorithm => Base64::encode(
-                    hash($algorithm, $script, true)
-                )
+                $algorithm => Base64::encode($digest)
             ];
         }
         return $this;
@@ -1178,10 +1181,6 @@ class CSPBuilder
             /** @var array<array-key, array<string, string>> $hashes */
             $hashes = $policies['hashes'];
             foreach ($hashes as $hash) {
-                /**
-                 * @var string $algo
-                 * @var string $hashval
-                 */
                 foreach ($hash as $algo => $hashval) {
                     $ret .= implode('', [
                         "'",
@@ -1356,7 +1355,7 @@ class CSPBuilder
      */
     public function exportPolicies(): string
     {
-        return json_encode($this->policies, JSON_PRETTY_PRINT);
+        return json_encode($this->policies, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
     }
 
     /**

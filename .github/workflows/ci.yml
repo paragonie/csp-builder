@@ -9,16 +9,16 @@ jobs:
     strategy:
       matrix:
         operating-system: ['ubuntu-latest']
-        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4']
+        php-versions: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
 
-    continue-on-error: ${{ matrix.php-versions == '8.4' }}
+    continue-on-error: ${{ matrix.php-versions == '8.5' }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: mbstring, intl, sodium
@@ -27,11 +27,11 @@ jobs:
 
       - name: Install Composer dependencies (PHP < 8.1)
         if: ${{ matrix.php-versions != '8.3' }}
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
 
       - name: Install Composer dependencies - ignore-platform-reqs (PHP 8.1)
         if: ${{ matrix.php-versions == '8.3' }}
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
         with:
           composer-options: --ignore-platform-reqs
 
