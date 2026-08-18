@@ -12,17 +12,17 @@ jobs:
         php-versions: ['8.3']
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ matrix.php-versions }}
-          tools: psalm:4
+          tools: psalm:6
           coverage: none
 
       - name: Install Composer dependencies
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@a8d0d959dab41457692a5e2041bd9b757a119e3f" # 3.2.1
         with:
           composer-options: --no-dev
 
