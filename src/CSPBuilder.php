@@ -452,7 +452,11 @@ class CSPBuilder
                 continue;
             }
 
-            [$name, $values] = preg_split($pattern, $directive, 2) + [null, null];
+            $parts = preg_split($pattern, $directive, 2);
+            if ($parts === false) {
+                throw new Exception('Could not split CSP directive');
+            }
+            [$name, $values] = $parts + [null, null];
             $name = strtolower($name);
             if (isset($seen[$name])) {
                 continue;
@@ -472,7 +476,11 @@ class CSPBuilder
                 continue;
             }
 
-            foreach (preg_split($pattern, $values, -1, PREG_SPLIT_NO_EMPTY) as $value) {
+            $sources = preg_split($pattern, $values, -1, PREG_SPLIT_NO_EMPTY);
+            if ($sources === false) {
+                throw new Exception('Could not split CSP directive values');
+            }
+            foreach ($sources as $value) {
                 if ('report-to' === $name) {
                     $csp->setReportTo($value);
                 } elseif ('report-uri' === $name) {
